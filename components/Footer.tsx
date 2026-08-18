@@ -1,18 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { ShieldCheck, Lock, Users, AlertTriangle, FileCheck, PhoneCall, Shield, ChevronRight } from "lucide-react";
+import { FileCheck } from "lucide-react";
 
 export default function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-white text-slate-600 mt-auto">
       {/* Top Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center justify-between">
           
           {/* Column 1: Brand & Identity */}
-          <div className="space-y-4 md:col-span-1">
+          <div className="space-y-3 max-w-xl">
             <div className="flex items-center gap-3">
               <div className="relative h-12 w-12 shrink-0">
                 <Image
@@ -35,71 +34,23 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed text-justify">
-              Plataforma institucional de inducción, entrenamiento táctico y acreditación en Protocolos de Seguridad y Custodia Escolar para docentes y colaboradores del CBSJC.
+              Plataforma institucional de socialización, entrenamiento táctico y acreditación en Protocolos de Seguridad y Custodia Escolar para docentes, directivos y colaboradores del CBSJC.
             </p>
           </div>
 
-          {/* Column 2: Ejes de Seguridad */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-black text-[#0B1953] uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
-              <Shield className="h-4 w-4 text-[#D91A23]" />
-              <span>Módulos de Seguridad</span>
-            </h4>
-            <ul className="space-y-2 text-xs font-medium text-slate-600">
-              <li>
-                <Link href="/dashboard" className="hover:text-[#0B1953] hover:underline flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
-                  <span>1. Deber de Diligencia (Num. 56)</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard" className="hover:text-[#0B1953] hover:underline flex items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>2. Traslados y Rutina de Conteo</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard" className="hover:text-[#0B1953] hover:underline flex items-center gap-1.5">
-                  <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
-                  <span>3. 22 Zonas y Patios de Descanso</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard" className="hover:text-[#0B1953] hover:underline flex items-center gap-1.5">
-                  <Lock className="h-3.5 w-3.5 text-rose-600" />
-                  <span>4. Baños y Privacidad de Menores</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 3: Marco Regulatorio */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-black text-[#0B1953] uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
+          {/* Column 2: Marco Regulatorio */}
+          <div className="space-y-2.5 md:text-right flex flex-col md:items-end">
+            <h4 className="text-xs font-black text-[#0B1953] uppercase tracking-wider flex items-center gap-1.5">
               <FileCheck className="h-4 w-4 text-blue-600" />
-              <span>Marco Institucional</span>
+              <span>Marco Institucional y Regulatorio</span>
             </h4>
-            <ul className="space-y-1.5 text-xs text-slate-500">
-              <li>• Código: <strong>SJB-RGD003 V2</strong></li>
-              <li>• Vigencia: Año Lectivo 2026 - 2027</li>
-              <li>• Ley 1098/2006 (Infancia y Adolescencia)</li>
-              <li>• Ley 1620/2013 de Convivencia Escolar</li>
-              <li>• Salidas: 100% Pickup SJ (Sin WhatsApp)</li>
+            <ul className="space-y-1 text-xs text-slate-500 font-medium">
+              <li>Código Documental: <strong className="text-[#0B1953]">SJB-RGD003 V2</strong></li>
+              <li>Vigencia: Año Lectivo 2026 - 2027</li>
+              <li>Ley 1098 de 2006 (Código de Infancia y Adolescencia)</li>
+              <li>Ley 1620 de 2013 de Convivencia Escolar y Deber de Diligencia</li>
+              <li>Canal Exclusivo de Salidas: Pickup SJ Campestre</li>
             </ul>
-          </div>
-
-          {/* Column 4: Cadena de Mando */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-black text-[#0B1953] uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
-              <PhoneCall className="h-4 w-4 text-emerald-600" />
-              <span>Cadena de Mando (Num. 22)</span>
-            </h4>
-            <div className="space-y-1.5 text-[11px] text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <p className="font-bold text-[#0B1953]">1. Docente / Funcionario</p>
-              <p className="flex items-center gap-1 text-slate-500 font-semibold"><ChevronRight className="h-3 w-3 text-slate-400" /> 2. Coordinación de Convivencia</p>
-              <p className="flex items-center gap-1 text-slate-500 font-semibold"><ChevronRight className="h-3 w-3 text-slate-400" /> 3. Rectoría Institucional</p>
-              <p className="text-[10px] text-slate-400 italic pt-1 border-t border-slate-200">Reporte formal inmediato el mismo día.</p>
-            </div>
           </div>
 
         </div>
