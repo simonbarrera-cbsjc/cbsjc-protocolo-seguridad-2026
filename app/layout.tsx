@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 
 export const viewport: Viewport = {
@@ -14,8 +15,11 @@ export const metadata: Metadata = {
   keywords: ["CBSJC", "Protocolos de Seguridad", "Custodia Escolar", "SJB-RGD003", "Pickup SJ", "SEED BLOOM", "Docentes 2026"],
   authors: [{ name: "CBSJC S.A.S. — Colegio Bilingüe San José Campestre" }],
   icons: {
-    icon: "/logo-cbsjc.png",
-    shortcut: "/logo-cbsjc.png",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/logo-cbsjc.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
     apple: "/logo-cbsjc.png",
   },
 };
@@ -27,6 +31,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/logo-cbsjc.png" type="image/png" />
+      </head>
       <body className="antialiased bg-bg-soft text-text-dark selection:bg-accent/25 selection:text-primary">
         <ScrollToTop />
         <div className="flex min-h-screen flex-col">
@@ -34,6 +42,7 @@ export default function RootLayout({
           <main className="flex flex-1 flex-col">
             {children}
           </main>
+          <Footer />
         </div>
       </body>
     </html>
