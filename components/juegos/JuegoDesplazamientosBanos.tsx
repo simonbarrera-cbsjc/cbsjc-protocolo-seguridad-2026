@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Footprints, CheckCircle2, AlertTriangle, RefreshCw, Trophy, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Footprints, CheckCircle2, AlertTriangle, RotateCcw, ArrowRight } from "lucide-react";
 import confetti from "canvas-confetti";
 
 interface Scenario {
@@ -35,7 +34,7 @@ const ESCENARIOS: Scenario[] = [
       {
         text: "Dejar que el monitor de 5 años guíe el grupo por los pasillos.",
         isCorrect: false,
-        explanation: "Incorrecto. La custodia de menores no se delega en otros estudiantes."
+        explanation: "Incorrecto. La custodia de menores no se delega en otros estudiantes bajo ninguna circunstancia."
       }
     ]
   },
@@ -69,12 +68,12 @@ const ESCENARIOS: Scenario[] = [
       {
         text: "Asumir que se demoró lavándose las manos y esperar al final de la jornada.",
         isCorrect: false,
-        explanation: "Incorrecto. El exceso del tiempo razonable exige activación inmediata de búsqueda."
+        explanation: "Incorrecto. El exceso del tiempo razonable exige activación inmediata de verificación."
       },
       {
         text: "Verificar de inmediato el baño o enviar apoyo docente e informar a Coordinación sin esperar a terminar la clase.",
         isCorrect: true,
-        explanation: "¡Correcto! El Numeral 43 establece la verificación inmediata y reporte a Coordinación frente a demoras no justificadas."
+        explanation: "¡Correcto! El Numeral 43 establece la verificación inmediata y reporte a Coordinación frente a demoras no justificadas (+10 min)."
       },
       {
         text: "Cerrar la puerta con llave para que aprenda a ser puntual.",
@@ -94,189 +93,192 @@ const ESCENARIOS: Scenario[] = [
         explanation: "Incorrecto. Prohibición estricta: ningún adulto externo puede ingresar a baños de estudiantes."
       },
       {
-        text: "Indicarle que los baños de alumnos son exclusivos para ellos y orientarlo a los baños de la zona de oficinas.",
+        text: "Indicarle que los baños de alumnos son exclusivos para ellos y orientarlo a los baños de la zona de administración.",
         isCorrect: true,
         explanation: "¡Correcto! El Numeral 45 consagra la exclusividad absoluta de los sanitarios estudiantiles."
       },
       {
         text: "Acompañarlo adentro para vigilarlo.",
         isCorrect: false,
-        explanation: "Incorrecto. Debe ser dirigido a la batería sanitaria institucional de administración."
+        explanation: "Incorrecto. Debe ser dirigido a la batería sanitaria institucional de oficinas."
       }
     ]
   }
 ];
 
 export default function JuegoDesplazamientosBanos({ onComplete }: { onComplete: () => void }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const [attempts, setAttempts] = useState(0);
 
-  const currentScenario = ESCENARIOS[currentIndex];
+  const currentScenario = ESCENARIOS[currentIdx];
+  const isCorrect = selectedOption !== null && currentScenario.options[selectedOption].isCorrect;
 
   const handleSelect = (index: number) => {
-    if (selectedOption !== null) return;
     setSelectedOption(index);
+    setIsAnswered(true);
 
     if (currentScenario.options[index].isCorrect) {
-      setScore((prev) => prev + 1);
+      setScore(s => s + 1);
+    } else {
+      setAttempts(a => a + 1);
     }
   };
 
-  const handleNext = useCallback(() => {
+  const handleNext = () => {
+    setIsAnswered(false);
     setSelectedOption(null);
-    if (currentIndex + 1 < ESCENARIOS.length) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      setIsFinished(true);
-      if (score + (selectedOption !== null && currentScenario.options[selectedOption].isCorrect ? 1 : 0) >= 3) {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        if (!hasCompleted) {
-          setHasCompleted(true);
-          onComplete();
-        }
-      }
-    }
-  }, [currentIndex, selectedOption, currentScenario, score, hasCompleted, onComplete]);
 
-  const restartGame = () => {
-    setCurrentIndex(0);
+    if (currentIdx < ESCENARIOS.length - 1) {
+      setCurrentIdx(c => c + 1);
+    } else {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      onComplete();
+    }
+  };
+
+  const handleRetry = () => {
+    setIsAnswered(false);
     setSelectedOption(null);
-    setScore(0);
-    setIsFinished(false);
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-xl">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
-            <Footprints className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">Rastreador de Tránsito y Baños</h3>
-            <p className="text-xs text-slate-400">Decisiones de traslado y sanitarios por nivel escolar</p>
-          </div>
-        </div>
-        <span className="text-xs font-semibold px-3 py-1 bg-teal-950/60 border border-teal-800 text-teal-300 rounded-full">
-          Caso {currentIndex + 1} de {ESCENARIOS.length}
-        </span>
-      </div>
-
-      {!isFinished ? (
-        <div>
-          {/* Situation Box */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-5 mb-5">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-teal-950/80 text-teal-300 border border-teal-700/50">
-                Nivel: {currentScenario.level}
-              </span>
+    <div className="space-y-6">
+      {/* Gaming Header (Light Theme) */}
+      <div className="relative overflow-hidden rounded-[24px] border border-teal-200 bg-gradient-to-br from-teal-50/80 via-white to-emerald-50/50 p-5 shadow-xs text-text-dark">
+        <div className="relative flex flex-col sm:flex-row gap-5 items-center">
+          <div className="relative shrink-0">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 shadow-xs">
+              <Footprints className="w-10 h-10" />
             </div>
-            <p className="text-base text-slate-100 font-medium leading-relaxed">
-              {currentScenario.situation}
+            <div className="absolute -bottom-2 -right-2 bg-teal-600 font-black text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider text-white shadow-xs">
+              NUM. 41-45
+            </div>
+          </div>
+          <div className="text-center sm:text-left space-y-1.5">
+            <span className="inline-block text-[10px] font-black tracking-widest text-teal-700 uppercase bg-teal-500/10 px-2.5 py-0.5 rounded-full border border-teal-500/20">
+              Minijuego Pedagógico · Módulo 2
+            </span>
+            <h3 className="text-lg font-black uppercase tracking-tight text-primary">
+              Rastreador de Tránsito y Baños
+            </h3>
+            <p className="text-xs text-text-muted leading-relaxed max-w-xl font-medium">
+              Aplica los protocolos de desplazamientos, acompañamiento diferenciado y exclusividad de baños por nivel escolar.
             </p>
           </div>
+        </div>
+      </div>
 
-          {/* Options */}
-          <div className="space-y-3 mb-6">
-            {currentScenario.options.map((opt, idx) => {
-              const isSelected = selectedOption === idx;
-              let btnStyle = "bg-slate-950/50 border-slate-800 hover:border-slate-700 text-slate-300";
+      {/* Game Status Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl text-xs font-bold text-primary shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-teal-600 animate-pulse" />
+          <span className="uppercase tracking-wider">Fase: Toma de Decisiones en Tránsito</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="bg-primary/5 px-3 py-1 rounded-lg">ESCENARIO: {currentIdx + 1} / {ESCENARIOS.length}</span>
+          <span className="text-slate-300">|</span>
+          <span className="bg-emerald-50 px-3 py-1 rounded-lg text-emerald-700">ACIERTOS: {score}</span>
+          {attempts > 0 && (
+            <>
+              <span className="text-slate-300">|</span>
+              <span className="bg-rose-50 px-3 py-1 rounded-lg text-rose-700">REINTENTOS: {attempts}</span>
+            </>
+          )}
+        </div>
+      </div>
 
-              if (selectedOption !== null) {
-                if (opt.isCorrect) {
-                  btnStyle = "bg-emerald-950/40 border-emerald-500 text-emerald-200 font-medium";
-                } else if (isSelected && !opt.isCorrect) {
-                  btnStyle = "bg-red-950/40 border-red-500 text-red-200";
-                } else {
-                  btnStyle = "opacity-40 border-slate-800 text-slate-500";
-                }
-              }
+      {/* Progress indicators */}
+      <div className="flex justify-center gap-2">
+        {ESCENARIOS.map((_, qIdx) => (
+          <div
+            key={qIdx}
+            className={`h-2 rounded-full transition-all ${
+              qIdx === currentIdx 
+                ? "w-12 bg-accent" 
+                : qIdx < currentIdx 
+                  ? "w-6 bg-teal-600" 
+                  : "w-6 bg-slate-200"
+            }`}
+          />
+        ))}
+      </div>
 
-              return (
-                <button
-                  key={idx}
-                  onClick={() => handleSelect(idx)}
-                  disabled={selectedOption !== null}
-                  className={`w-full p-4 rounded-xl border text-left text-sm transition-all flex items-start gap-3 ${btnStyle}`}
-                >
-                  <span className="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                    {String.fromCharCode(65 + idx)}
-                  </span>
-                  <span className="flex-1 leading-relaxed">{opt.text}</span>
-                </button>
-              );
-            })}
-          </div>
+      {/* Situation Card */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xs space-y-2 text-left relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-teal-500 to-primary" />
+        <span className="text-[10px] font-black uppercase tracking-wider text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200 inline-block">
+          Nivel: {currentScenario.level}
+        </span>
+        <p className="text-sm font-bold text-slate-800 leading-relaxed sm:text-base">
+          {currentScenario.situation}
+        </p>
+      </div>
 
-          {/* Explanation & Next */}
-          <AnimatePresence>
-            {selectedOption !== null && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`p-4 rounded-xl border flex flex-col gap-2 mb-4 ${
-                  currentScenario.options[selectedOption].isCorrect
-                    ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-200"
-                    : "bg-red-950/30 border-red-700/50 text-red-200"
-                }`}
-              >
-                <div className="flex items-center gap-2 text-xs font-bold">
-                  {currentScenario.options[selectedOption].isCorrect ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  ) : (
-                    <AlertTriangle className="w-4 h-4 text-red-400" />
-                  )}
-                  <span>
-                    {currentScenario.options[selectedOption].isCorrect
-                      ? "¡Excelente Decisión!"
-                      : "Procedimiento No Conforme:"}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  {currentScenario.options[selectedOption].explanation}
-                </p>
-                <button
-                  onClick={handleNext}
-                  className="self-end mt-2 px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-lg"
-                >
-                  <span>Continuar</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+      {/* Option Buttons */}
+      {!isAnswered ? (
+        <div className="space-y-3">
+          {currentScenario.options.map((opt, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSelect(idx)}
+              className="w-full p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white hover:border-primary hover:bg-slate-50 transition-all text-left text-xs sm:text-sm font-bold text-slate-800 flex items-start gap-3.5 shadow-xs cursor-pointer active:scale-[0.99]"
+            >
+              <span className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
+                {String.fromCharCode(65 + idx)}
+              </span>
+              <span className="flex-1 leading-relaxed">{opt.text}</span>
+            </button>
+          ))}
         </div>
       ) : (
-        <div className="text-center py-8">
-          <div className="w-16 h-16 rounded-full bg-teal-500/20 border border-teal-500/40 mx-auto flex items-center justify-center text-teal-400 mb-4">
-            <Trophy className="w-8 h-8" />
+        <div className="space-y-4 animate-fade-in">
+          {/* Answer Feedback Alert */}
+          <div className={`rounded-2xl border p-5 flex gap-4 ${
+            isCorrect 
+              ? "bg-emerald-50 border-emerald-300 text-emerald-900" 
+              : "bg-rose-50 border-rose-300 text-rose-900"
+          }`}>
+            <div className="flex-shrink-0">
+              {isCorrect ? (
+                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <CheckCircle2 className="h-6 w-6 stroke-[2.5]" />
+                </div>
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                  <AlertTriangle className="h-6 w-6 stroke-[2.5]" />
+                </div>
+              )}
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-sm font-black uppercase tracking-wider">
+                {isCorrect ? "¡Excelente Procedimiento!" : "Procedimiento No Conforme:"}
+              </h4>
+              <p className="text-xs leading-relaxed font-semibold">
+                {currentScenario.options[selectedOption!].explanation}
+              </p>
+            </div>
           </div>
-          <h4 className="text-2xl font-black text-white mb-2">
-            {score >= 3 ? "¡Control de Rutas y Baños Certificado!" : "Refuerza los Numerales 41-45"}
-          </h4>
-          <p className="text-slate-300 text-sm max-w-md mx-auto mb-6">
-            Puntaje final: <strong className="text-white">{score} de {ESCENARIOS.length}</strong> aciertos.
-            {score >= 3
-              ? " Tienes total claridad sobre la exclusividad de baños y traslados por nivel."
-              : " Repasa los protocolos de preescolar y reporte oportuno ante demoras en sanitarios."}
-          </p>
-          <div className="flex justify-center gap-4">
-            {score < 3 ? (
+
+          <div className="flex justify-end">
+            {isCorrect ? (
               <button
-                onClick={restartGame}
-                className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-sm font-semibold flex items-center gap-2 border border-slate-700 transition-colors"
+                onClick={handleNext}
+                className="w-full sm:w-auto rounded-xl bg-primary px-8 py-4 font-black text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-light hover:shadow-xl active:scale-[0.98] cursor-pointer text-xs uppercase tracking-widest flex items-center justify-center gap-2"
               >
-                <RefreshCw className="w-4 h-4" />
-                Reintentar
+                <span>{currentIdx < ESCENARIOS.length - 1 ? "Siguiente Escenario" : "Finalizar Reto"}</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-950/60 border border-emerald-600/50 rounded-xl text-emerald-300 text-sm font-bold">
-                <CheckCircle2 className="w-4 h-4" />
-                Acreditación de Módulo Lista
-              </div>
+              <button
+                onClick={handleRetry}
+                className="w-full sm:w-auto rounded-xl bg-accent px-8 py-4 font-black text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent-dark hover:shadow-xl active:scale-[0.98] cursor-pointer text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Reintentar Escenario</span>
+              </button>
             )}
           </div>
         </div>

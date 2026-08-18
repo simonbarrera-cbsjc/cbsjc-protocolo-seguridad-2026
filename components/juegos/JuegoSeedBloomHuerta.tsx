@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Compass, CheckCircle2, AlertTriangle, RefreshCw, Trophy, ArrowRight, ShieldAlert } from "lucide-react";
+import { useState } from "react";
+import { Compass, CheckCircle2, AlertTriangle, RotateCcw, ArrowRight, ShieldAlert } from "lucide-react";
 import confetti from "canvas-confetti";
 
 interface Challenge {
@@ -71,183 +70,186 @@ const DESAFIOS: Challenge[] = [
 ];
 
 export default function JuegoSeedBloomHuerta({ onComplete }: { onComplete: () => void }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const [attempts, setAttempts] = useState(0);
 
-  const currentChallenge = DESAFIOS[currentIndex];
+  const currentChallenge = DESAFIOS[currentIdx];
+  const isCorrect = selectedOption === currentChallenge.correctIndex;
 
   const handleSelect = (index: number) => {
-    if (selectedOption !== null) return;
     setSelectedOption(index);
+    setIsAnswered(true);
 
     if (index === currentChallenge.correctIndex) {
-      setScore((prev) => prev + 1);
+      setScore(s => s + 1);
+    } else {
+      setAttempts(a => a + 1);
     }
   };
 
-  const handleNext = useCallback(() => {
+  const handleNext = () => {
+    setIsAnswered(false);
     setSelectedOption(null);
-    if (currentIndex + 1 < DESAFIOS.length) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      setIsFinished(true);
-      if (score + (selectedOption === currentChallenge.correctIndex ? 1 : 0) >= 3) {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        if (!hasCompleted) {
-          setHasCompleted(true);
-          onComplete();
-        }
-      }
-    }
-  }, [currentIndex, selectedOption, currentChallenge, score, hasCompleted, onComplete]);
 
-  const restartGame = () => {
-    setCurrentIndex(0);
+    if (currentIdx < DESAFIOS.length - 1) {
+      setCurrentIdx(c => c + 1);
+    } else {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      onComplete();
+    }
+  };
+
+  const handleRetry = () => {
+    setIsAnswered(false);
     setSelectedOption(null);
-    setScore(0);
-    setIsFinished(false);
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-xl">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-            <Compass className="w-5 h-5" />
+    <div className="space-y-6">
+      {/* Gaming Header (Light Theme) */}
+      <div className="relative overflow-hidden rounded-[24px] border border-amber-200 bg-gradient-to-br from-amber-50/80 via-white to-orange-50/50 p-5 shadow-xs text-text-dark">
+        <div className="relative flex flex-col sm:flex-row gap-5 items-center">
+          <div className="relative shrink-0">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 shadow-xs">
+              <Compass className="w-10 h-10" />
+            </div>
+            <div className="absolute -bottom-2 -right-2 bg-amber-600 font-black text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider text-white shadow-xs">
+              NUM. 46-48
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">Inspector SEED BLOOM y Huerta</h3>
-            <p className="text-xs text-slate-400">Control de riesgos en picadero ecuestre y zonas abiertas</p>
+          <div className="text-center sm:text-left space-y-1.5">
+            <span className="inline-block text-[10px] font-black tracking-widest text-amber-800 uppercase bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+              Minijuego Pedagógico · Módulo 3
+            </span>
+            <h3 className="text-lg font-black uppercase tracking-tight text-primary">
+              Inspector SEED BLOOM y Huerta
+            </h3>
+            <p className="text-xs text-text-muted leading-relaxed max-w-xl font-medium">
+              Control de riesgos en picadero ecuestre, uso estricto de EPP y bioseguridad en espacios abiertos.
+            </p>
           </div>
         </div>
-        <span className="text-xs font-semibold px-3 py-1 bg-amber-950/60 border border-amber-800 text-amber-300 rounded-full">
-          Reto {currentIndex + 1} de {DESAFIOS.length}
-        </span>
       </div>
 
-      {!isFinished ? (
-        <div>
-          {/* Environment and Risk Header */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-5 mb-5 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-700/50">
-                {currentChallenge.environment}
+      {/* Game Status Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl text-xs font-bold text-primary shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-amber-600 animate-pulse" />
+          <span className="uppercase tracking-wider">Fase: Supervisión de Espacios Especializados</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="bg-primary/5 px-3 py-1 rounded-lg">DESAFÍO: {currentIdx + 1} / {DESAFIOS.length}</span>
+          <span className="text-slate-300">|</span>
+          <span className="bg-emerald-50 px-3 py-1 rounded-lg text-emerald-700">ACIERTOS: {score}</span>
+          {attempts > 0 && (
+            <>
+              <span className="text-slate-300">|</span>
+              <span className="bg-rose-50 px-3 py-1 rounded-lg text-rose-700">REINTENTOS: {attempts}</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Progress indicators */}
+      <div className="flex justify-center gap-2">
+        {DESAFIOS.map((_, qIdx) => (
+          <div
+            key={qIdx}
+            className={`h-2 rounded-full transition-all ${
+              qIdx === currentIdx 
+                ? "w-12 bg-accent" 
+                : qIdx < currentIdx 
+                  ? "w-6 bg-amber-600" 
+                  : "w-6 bg-slate-200"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Situation Card */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xs space-y-2 text-left relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-500 to-primary" />
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+            {currentChallenge.environment}
+          </span>
+          <span className="text-[10px] text-rose-600 flex items-center gap-1 font-bold">
+            <ShieldAlert className="w-3.5 h-3.5" /> Riesgo de Campo
+          </span>
+        </div>
+        <p className="text-sm font-bold text-slate-800 leading-relaxed sm:text-base">
+          {currentChallenge.scenario}
+        </p>
+        <p className="text-xs text-slate-500 italic pt-1 border-t border-slate-100 font-medium">
+          <strong>Peligro identificado:</strong> {currentChallenge.riskItem}
+        </p>
+      </div>
+
+      {/* Option Buttons */}
+      {!isAnswered ? (
+        <div className="space-y-3">
+          {currentChallenge.options.map((opt, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSelect(idx)}
+              className="w-full p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white hover:border-amber-500 hover:bg-amber-50/20 transition-all text-left text-xs sm:text-sm font-bold text-slate-800 flex items-start gap-3.5 shadow-xs cursor-pointer active:scale-[0.99]"
+            >
+              <span className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
+                {idx + 1}
               </span>
-              <span className="text-xs text-rose-400 flex items-center gap-1 font-semibold">
-                <ShieldAlert className="w-3.5 h-3.5" />
-                Riesgo Crítico
-              </span>
-            </div>
-            <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
-              {currentChallenge.scenario}
-            </p>
-            <p className="text-xs text-slate-400 italic">
-              <strong>Peligro identificado:</strong> {currentChallenge.riskItem}
-            </p>
-          </div>
-
-          {/* Options */}
-          <div className="space-y-3 mb-6">
-            {currentChallenge.options.map((opt, idx) => {
-              const isSelected = selectedOption === idx;
-              const isCorrect = idx === currentChallenge.correctIndex;
-              let btnStyle = "bg-slate-950/50 border-slate-800 hover:border-slate-700 text-slate-300";
-
-              if (selectedOption !== null) {
-                if (isCorrect) {
-                  btnStyle = "bg-emerald-950/40 border-emerald-500 text-emerald-200 font-medium";
-                } else if (isSelected && !isCorrect) {
-                  btnStyle = "bg-red-950/40 border-red-500 text-red-200";
-                } else {
-                  btnStyle = "opacity-40 border-slate-800 text-slate-500";
-                }
-              }
-
-              return (
-                <button
-                  key={idx}
-                  onClick={() => handleSelect(idx)}
-                  disabled={selectedOption !== null}
-                  className={`w-full p-4 rounded-xl border text-left text-sm transition-all flex items-start gap-3 ${btnStyle}`}
-                >
-                  <span className="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                    {idx + 1}
-                  </span>
-                  <span className="flex-1 leading-relaxed">{opt}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Feedback */}
-          <AnimatePresence>
-            {selectedOption !== null && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`p-4 rounded-xl border flex flex-col gap-2 mb-4 ${
-                  selectedOption === currentChallenge.correctIndex
-                    ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-200"
-                    : "bg-red-950/30 border-red-700/50 text-red-200"
-                }`}
-              >
-                <div className="flex items-center gap-2 text-xs font-bold">
-                  {selectedOption === currentChallenge.correctIndex ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  ) : (
-                    <AlertTriangle className="w-4 h-4 text-red-400" />
-                  )}
-                  <span>
-                    {selectedOption === currentChallenge.correctIndex
-                      ? "¡Protocolo Aplicado Correctamente!"
-                      : "Respuesta Incorrecta:"}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  {currentChallenge.correctAction}
-                </p>
-                <button
-                  onClick={handleNext}
-                  className="self-end mt-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-lg"
-                >
-                  <span>Siguiente Desafío</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              <span className="flex-1 leading-relaxed">{opt}</span>
+            </button>
+          ))}
         </div>
       ) : (
-        <div className="text-center py-8">
-          <div className="w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/40 mx-auto flex items-center justify-center text-amber-400 mb-4">
-            <Trophy className="w-8 h-8" />
+        <div className="space-y-4 animate-fade-in">
+          {/* Answer Feedback Alert */}
+          <div className={`rounded-2xl border p-5 flex gap-4 ${
+            isCorrect 
+              ? "bg-emerald-50 border-emerald-300 text-emerald-900" 
+              : "bg-rose-50 border-rose-300 text-rose-900"
+          }`}>
+            <div className="flex-shrink-0">
+              {isCorrect ? (
+                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <CheckCircle2 className="h-6 w-6 stroke-[2.5]" />
+                </div>
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                  <AlertTriangle className="h-6 w-6 stroke-[2.5]" />
+                </div>
+              )}
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-sm font-black uppercase tracking-wider">
+                {isCorrect ? "¡Protocolo Aplicado Correctamente!" : "Respuesta Incorrecta:"}
+              </h4>
+              <p className="text-xs leading-relaxed font-semibold">
+                {currentChallenge.correctAction}
+              </p>
+            </div>
           </div>
-          <h4 className="text-2xl font-black text-white mb-2">
-            {score >= 3 ? "¡Inspector de Campo Acreditado!" : "Refuerza Normas de Campo"}
-          </h4>
-          <p className="text-slate-300 text-sm max-w-md mx-auto mb-6">
-            Lograste <strong className="text-white">{score} de {DESAFIOS.length}</strong> intervenciones preventivas correctas.
-            {score >= 3
-              ? " Tienes pleno conocimiento del programa SEED BLOOM y bioseguridad en la huerta."
-              : " Revisa los numerales 47 y 48 sobre EPP ecuestre y manejo de animales."}
-          </p>
-          <div className="flex justify-center gap-4">
-            {score < 3 ? (
+
+          <div className="flex justify-end">
+            {isCorrect ? (
               <button
-                onClick={restartGame}
-                className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-sm font-semibold flex items-center gap-2 border border-slate-700 transition-colors"
+                onClick={handleNext}
+                className="w-full sm:w-auto rounded-xl bg-primary px-8 py-4 font-black text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-light hover:shadow-xl active:scale-[0.98] cursor-pointer text-xs uppercase tracking-widest flex items-center justify-center gap-2"
               >
-                <RefreshCw className="w-4 h-4" />
-                Reintentar
+                <span>{currentIdx < DESAFIOS.length - 1 ? "Siguiente Desafío" : "Finalizar Reto"}</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-950/60 border border-emerald-600/50 rounded-xl text-emerald-300 text-sm font-bold">
-                <CheckCircle2 className="w-4 h-4" />
-                Módulo 3 Completado
-              </div>
+              <button
+                onClick={handleRetry}
+                className="w-full sm:w-auto rounded-xl bg-accent px-8 py-4 font-black text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent-dark hover:shadow-xl active:scale-[0.98] cursor-pointer text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Reintentar Desafío</span>
+              </button>
             )}
           </div>
         </div>

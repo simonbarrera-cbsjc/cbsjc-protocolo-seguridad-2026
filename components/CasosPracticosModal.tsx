@@ -141,42 +141,46 @@ export default function CasosPracticosModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-4xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+          className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-[28px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         >
-          {/* Header */}
-          <div className="p-6 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between">
+          {/* Header (Light Theme) */}
+          <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-                <BookOpen className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                <BookOpen className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Banco de 12 Casos Prácticos Institucionales</h3>
-                <p className="text-xs text-slate-400">Anexo B · Casos para discusión y fundamentación normativa</p>
+                <span className="text-[10px] font-black tracking-widest text-accent uppercase">
+                  Anexo B · Casos Prácticos Institucionales
+                </span>
+                <h3 className="text-base sm:text-lg font-black text-primary uppercase">
+                  Banco de 12 Casos de Custodia Escolar
+                </h3>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-800/60 hover:bg-slate-800 transition-colors"
+              className="p-2 text-slate-400 hover:text-slate-700 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Search & Filter Bar */}
-          <div className="p-4 bg-slate-950/40 border-b border-slate-800 flex flex-col sm:flex-row gap-3">
+          {/* Search & Filter Bar (Light Theme) */}
+          <div className="p-4 bg-slate-50/70 border-b border-slate-100 flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar por palabra clave, numeral o hecho..."
-                className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-accent shadow-xs"
               />
             </div>
             <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0">
@@ -184,10 +188,10 @@ export default function CasosPracticosModal({
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors border ${
+                  className={`px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border cursor-pointer ${
                     selectedCategory === cat
-                      ? "bg-amber-500/20 border-amber-500/60 text-amber-300"
-                      : "bg-slate-800/50 border-slate-700/60 text-slate-400 hover:text-slate-200"
+                      ? "bg-primary text-white border-primary shadow-xs"
+                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-800"
                   }`}
                 >
                   {cat}
@@ -196,10 +200,10 @@ export default function CasosPracticosModal({
             </div>
           </div>
 
-          {/* Cases List */}
-          <div className="p-6 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+          {/* Cases List (Light Theme) */}
+          <div className="p-6 overflow-y-auto space-y-3.5 flex-1 bg-white custom-scrollbar">
             {filteredCases.length === 0 ? (
-              <div className="text-center py-12 text-slate-400 text-sm">
+              <div className="text-center py-12 text-slate-400 text-xs font-semibold">
                 No se encontraron casos que coincidan con la búsqueda.
               </div>
             ) : (
@@ -208,24 +212,24 @@ export default function CasosPracticosModal({
                 return (
                   <div
                     key={c.id}
-                    className="border border-slate-800 rounded-xl bg-slate-950/50 overflow-hidden transition-all"
+                    className="border border-slate-200 rounded-2xl bg-slate-50/60 overflow-hidden transition-all shadow-xs"
                   >
                     <button
                       onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                      className="w-full p-4 text-left flex items-center justify-between hover:bg-slate-800/30 transition-colors"
+                      className="w-full p-4 text-left flex items-center justify-between hover:bg-slate-100/70 transition-colors cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 flex items-center justify-center text-xs font-bold shrink-0">
+                        <span className="w-7 h-7 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center text-xs font-black shrink-0">
                           {c.id}
                         </span>
                         <div>
-                          <h4 className="text-sm font-bold text-white">{c.title}</h4>
-                          <span className="text-xs text-amber-400/90 font-mono">{c.numeral}</span>
+                          <h4 className="text-xs sm:text-sm font-black text-primary uppercase">{c.title}</h4>
+                          <span className="text-[11px] text-accent font-bold font-mono">{c.numeral}</span>
                         </div>
                       </div>
                       <ChevronDown
-                        className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${
-                          isExpanded ? "rotate-180 text-amber-400" : ""
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                          isExpanded ? "rotate-180 text-accent" : ""
                         }`}
                       />
                     </button>
@@ -236,21 +240,21 @@ export default function CasosPracticosModal({
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="px-4 pb-4 pt-2 border-t border-slate-800/60 space-y-3 text-xs sm:text-sm"
+                          className="px-4 pb-4 pt-2 border-t border-slate-100 space-y-3 text-xs sm:text-sm bg-white"
                         >
-                          <div className="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
-                            <span className="font-bold text-slate-300 block mb-1 text-xs uppercase tracking-wide">
+                          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                            <span className="font-black text-primary block mb-1 text-[11px] uppercase tracking-wide">
                               Situación Fáctica:
                             </span>
-                            <p className="text-slate-300 leading-relaxed">{c.facts}</p>
+                            <p className="text-slate-700 leading-relaxed font-medium">{c.facts}</p>
                           </div>
 
-                          <div className="bg-emerald-950/20 p-3.5 rounded-lg border border-emerald-800/40">
-                            <div className="flex items-center gap-1.5 font-bold text-emerald-400 text-xs uppercase tracking-wide mb-1">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
+                          <div className="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200">
+                            <div className="flex items-center gap-1.5 font-black text-emerald-800 text-[11px] uppercase tracking-wide mb-1">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                               <span>Resolución y Estándar Institucional:</span>
                             </div>
-                            <p className="text-emerald-200 leading-relaxed">{c.protocolAnalysis}</p>
+                            <p className="text-emerald-900 leading-relaxed font-medium">{c.protocolAnalysis}</p>
                           </div>
                         </motion.div>
                       )}
@@ -261,12 +265,12 @@ export default function CasosPracticosModal({
             )}
           </div>
 
-          {/* Footer */}
-          <div className="p-4 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between text-xs text-slate-400">
-            <span>Se recomienda socializar estos 12 casos en las jornadas pedagógicas docentes.</span>
+          {/* Footer (Light Theme) */}
+          <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+            <span className="font-medium">Casos para discusión y fundamentación en jornadas pedagógicas.</span>
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-lg transition-colors"
+              className="px-5 py-2 bg-primary hover:bg-primary-light text-white font-bold rounded-xl transition-all cursor-pointer shadow-xs uppercase tracking-wider text-[11px]"
             >
               Cerrar
             </button>

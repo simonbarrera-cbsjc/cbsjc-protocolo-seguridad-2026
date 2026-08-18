@@ -2,30 +2,35 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckSquare, Square, ClipboardCheck, RotateCcw, ShieldCheck } from "lucide-react";
+import { X, CheckSquare, Square, ClipboardCheck, Sparkles, AlertCircle, RotateCcw } from "lucide-react";
 
 interface ChecklistItem {
   id: string;
-  category: "Antes de mover el grupo" | "En zona de acompañamiento" | "Durante cualquier actividad" | "En la salida" | "Al terminar";
-  label: string;
+  category: string;
+  moment: "Antes de Mover el Grupo" | "En Zona de Acompañamiento" | "Durante la Sesión / Aula" | "Al Finalizar la Jornada";
+  task: string;
+  numeralRef: string;
 }
 
 const CHECKLIST_ITEMS: ChecklistItem[] = [
-  { id: "c1", category: "Antes de mover el grupo", label: "Conté los estudiantes antes de salir del aula." },
-  { id: "c2", category: "Antes de mover el grupo", label: "Sé con claridad a dónde vamos y por qué ruta nos desplazaremos." },
-  { id: "c3", category: "Antes de mover el grupo", label: "Diligencié el formato de traslado institucional (si aplica)." },
-  { id: "c4", category: "En zona de acompañamiento", label: "Consulté la matriz de rotación de la semana vigente esta mañana." },
-  { id: "c5", category: "En zona de acompañamiento", label: "Estoy en el punto asignado desde el inicio exacto del descanso." },
-  { id: "c6", category: "En zona de acompañamiento", label: "Si requiero ausentarme, dejé relevo confirmado previamente con Coordinación." },
-  { id: "c7", category: "En zona de acompañamiento", label: "Verifiqué el retorno de todos los estudiantes al aula al terminar el timbre." },
-  { id: "c8", category: "Durante cualquier actividad", label: "Mantengo control visual permanente de todo el grupo." },
-  { id: "c9", category: "Durante cualquier actividad", label: "El uso del celular NO compromete mi vigilancia activa." },
-  { id: "c10", category: "Durante cualquier actividad", label: "Nadie se adelantó, se retrasó ni se separó del colectivo." },
-  { id: "c11", category: "En la salida", label: "Acompañé y supervisé al estudiante hasta el punto de entrega." },
-  { id: "c12", category: "En la salida", label: "NO autoricé ninguna entrega por WhatsApp, llamada o canal personal." },
-  { id: "c13", category: "En la salida", label: "Reporté a Coordinación cualquier inconsistencia en el llamado o demora." },
-  { id: "c14", category: "Al terminar", label: "Volví a contar el grupo al ingresar al salón o finalizar la jornada." },
-  { id: "c15", category: "Al terminar", label: "Reporté y registré formalmente las novedades ocurridas el mismo día." }
+  { id: "c1", category: "Traslados", moment: "Antes de Mover el Grupo", task: "Conté los estudiantes antes de salir del aula de origen.", numeralRef: "Idea Fuerza 2 & Num. 41" },
+  { id: "c2", category: "Traslados", moment: "Antes de Mover el Grupo", task: "Verifiqué que el desplazamiento se realice por la ruta segura y autorizada.", numeralRef: "Num. 41" },
+  { id: "c3", category: "Traslados", moment: "Antes de Mover el Grupo", task: "Confirmé autorización previa si se trata de un desplazamiento no habitual.", numeralRef: "Num. 56" },
+  
+  { id: "c4", category: "Patios", moment: "En Zona de Acompañamiento", task: "Consulté la matriz de rotación de la semana vigente para mi punto asignado.", numeralRef: "Num. 49" },
+  { id: "c5", category: "Patios", moment: "En Zona de Acompañamiento", task: "Llegué a mi zona asignada desde el inicio exacto del descanso escolar.", numeralRef: "Num. 49.3" },
+  { id: "c6", category: "Patios", moment: "En Zona de Acompañamiento", task: "Mantengo recorrido perimetral activo sin uso distractivo de celular.", numeralRef: "Num. 49.3 & 56" },
+  { id: "c7", category: "Patios", moment: "En Zona de Acompañamiento", task: "Vigilo accesos a baños y puntos ciegos de mi sector.", numeralRef: "Num. 49.4" },
+  { id: "c8", category: "Patios", moment: "En Zona de Acompañamiento", task: "Si requiero ausentarme, solicito y recibo relevo formal autorizado.", numeralRef: "Num. 49.3 & 56" },
+  
+  { id: "c9", category: "Aula/Campo", moment: "Durante la Sesión / Aula", task: "En SEED BLOOM, huerta o deportes, mantengo supervisión física constante.", numeralRef: "Idea Fuerza 3 & Num. 46" },
+  { id: "c10", category: "Aula/Campo", moment: "Durante la Sesión / Aula", task: "En picadero ecuestre, verifiqué el uso obligatorio de casco y EPP.", numeralRef: "Num. 47" },
+  { id: "c11", category: "Baños", moment: "Durante la Sesión / Aula", task: "En preescolar, acompaño hasta la puerta del baño; en primaria cronometro retorno.", numeralRef: "Num. 42 & 43" },
+  { id: "c12", category: "Baños", moment: "Durante la Sesión / Aula", task: "Verifico que ningún adulto externo ingrese a baños de estudiantes.", numeralRef: "Num. 45" },
+  
+  { id: "c13", category: "Salidas", moment: "Al Finalizar la Jornada", task: "Valido la entrega de estudiantes exclusivamente por el sistema Pickup SJ.", numeralRef: "Num. 26 & 27" },
+  { id: "c14", category: "Salidas", moment: "Al Finalizar la Jornada", task: "Rechacé solicitudes de entrega por WhatsApp o llamadas no validadas.", numeralRef: "Idea Fuerza 5 & Num. 28" },
+  { id: "c15", category: "Novedades", moment: "Al Finalizar la Jornada", task: "Radiqué formalmente toda novedad o reporte el mismo día con los 6 datos clave.", numeralRef: "Idea Fuerza 4 & Num. 36" }
 ];
 
 export default function ChecklistBolsilloModal({
@@ -35,115 +40,144 @@ export default function ChecklistBolsilloModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const [checkedIds, setCheckedIds] = useState<string[]>([]);
+  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const saved = localStorage.getItem("cbsjc_security_checklist");
+    const saved = localStorage.getItem("cbsjc_security_pocket_checklist");
     if (saved) {
       try {
-        setCheckedIds(JSON.parse(saved));
+        setCheckedItems(JSON.parse(saved));
       } catch (e) {
         console.error(e);
       }
     }
   }, []);
 
-  const toggleItem = (id: string) => {
-    const updated = checkedIds.includes(id)
-      ? checkedIds.filter((item) => item !== id)
-      : [...checkedIds, id];
-    setCheckedIds(updated);
-    localStorage.setItem("cbsjc_security_checklist", JSON.stringify(updated));
-  };
-
-  const resetAll = () => {
-    setCheckedIds([]);
-    localStorage.removeItem("cbsjc_security_checklist");
-  };
-
-  const categories = Array.from(new Set(CHECKLIST_ITEMS.map((item) => item.category)));
-  const progress = Math.round((checkedIds.length / CHECKLIST_ITEMS.length) * 100);
-
   if (!isOpen) return null;
+
+  const toggleItem = (id: string) => {
+    const next = { ...checkedItems, [id]: !checkedItems[id] };
+    setCheckedItems(next);
+    localStorage.setItem("cbsjc_security_pocket_checklist", JSON.stringify(next));
+  };
+
+  const handleReset = () => {
+    setCheckedItems({});
+    localStorage.removeItem("cbsjc_security_pocket_checklist");
+  };
+
+  const total = CHECKLIST_ITEMS.length;
+  const completed = Object.values(checkedItems).filter(Boolean).length;
+  const percent = Math.round((completed / total) * 100);
+
+  const moments: ("Antes de Mover el Grupo" | "En Zona de Acompañamiento" | "Durante la Sesión / Aula" | "Al Finalizar la Jornada")[] = [
+    "Antes de Mover el Grupo",
+    "En Zona de Acompañamiento",
+    "Durante la Sesión / Aula",
+    "Al Finalizar la Jornada"
+  ];
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          className="w-full max-w-3xl bg-white rounded-[28px] border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         >
-          {/* Header */}
-          <div className="p-6 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between">
+          {/* Header (Light Theme) */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 flex items-center justify-center">
                 <ClipboardCheck className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Checklist de Bolsillo del Docente</h3>
-                <p className="text-xs text-slate-400">Anexo A · Protocolos Institucionales de Seguridad SJB-RGD003</p>
+                <span className="text-[10px] font-black tracking-widest text-blue-600 uppercase">
+                  Anexo A · Herramienta Operativa
+                </span>
+                <h3 className="text-sm sm:text-base font-black text-slate-900 uppercase">
+                  Checklist de Bolsillo del Docente
+                </h3>
               </div>
             </div>
+
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-800/60 hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Progress Banner */}
-          <div className="px-6 py-3 bg-slate-950/40 border-b border-slate-800/80 flex items-center justify-between">
+          {/* Progress Bar (Light Theme) */}
+          <div className="px-6 py-3.5 bg-blue-50/50 border-b border-blue-100 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-semibold text-slate-300">
-                Cumplimiento Operativo: <strong className="text-emerald-400">{progress}%</strong> ({checkedIds.length}/{CHECKLIST_ITEMS.length})
+              <span className="text-xs font-black uppercase text-blue-900">Cumplimiento Operativo:</span>
+              <span className="text-xs font-extrabold text-blue-700 bg-white px-2.5 py-0.5 rounded-full border border-blue-200 shadow-xs">
+                {percent}% ({completed}/{total})
               </span>
             </div>
-            <button
-              onClick={resetAll}
-              className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 transition-colors"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Limpiar todo</span>
-            </button>
+
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="h-2 w-36 bg-blue-200/60 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-600 transition-all duration-300"
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <button
+                onClick={handleReset}
+                className="flex items-center gap-1 text-[10px] font-bold text-slate-500 hover:text-rose-600 transition-colors cursor-pointer uppercase tracking-wider"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reiniciar</span>
+              </button>
+            </div>
           </div>
 
-          {/* Items by Category */}
-          <div className="p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
-            {categories.map((cat) => {
-              const items = CHECKLIST_ITEMS.filter((item) => item.category === cat);
+          {/* Items List by Moments (100% Light Theme) */}
+          <div className="p-6 flex-1 overflow-y-auto space-y-6 bg-white custom-scrollbar">
+            {moments.map((moment) => {
+              const items = CHECKLIST_ITEMS.filter((item) => item.moment === moment);
               return (
-                <div key={cat} className="space-y-2.5">
-                  <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider bg-blue-950/30 px-3 py-1 rounded-md border border-blue-900/40 inline-block">
-                    {cat}
+                <div key={moment} className="space-y-3">
+                  <h4 className="text-xs font-black text-primary uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-accent" />
+                    <span>{moment}</span>
                   </h4>
-                  <div className="space-y-2">
+
+                  <div className="grid grid-cols-1 gap-2.5">
                     {items.map((item) => {
-                      const isChecked = checkedIds.includes(item.id);
+                      const isChecked = !!checkedItems[item.id];
                       return (
-                        <button
+                        <div
                           key={item.id}
                           onClick={() => toggleItem(item.id)}
-                          className={`w-full p-3.5 rounded-xl border text-left text-sm flex items-start gap-3 transition-all ${
+                          className={`p-3.5 rounded-2xl border transition-all flex items-start gap-3 cursor-pointer select-none ${
                             isChecked
-                              ? "bg-emerald-950/30 border-emerald-600/50 text-emerald-200"
-                              : "bg-slate-950/50 border-slate-800/80 hover:border-slate-700 text-slate-300"
+                              ? "bg-emerald-50/60 border-emerald-300 text-slate-800 shadow-xs"
+                              : "bg-slate-50/70 border-slate-200 hover:bg-white hover:border-slate-300 text-slate-700"
                           }`}
                         >
                           <div className="mt-0.5 shrink-0">
                             {isChecked ? (
-                              <CheckSquare className="w-4 h-4 text-emerald-400" />
+                              <CheckSquare className="w-5 h-5 text-emerald-600" />
                             ) : (
-                              <Square className="w-4 h-4 text-slate-500" />
+                              <Square className="w-5 h-5 text-slate-400" />
                             )}
                           </div>
-                          <span className={`flex-1 leading-relaxed ${isChecked ? "line-through text-slate-400" : ""}`}>
-                            {item.label}
-                          </span>
-                        </button>
+
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs sm:text-sm leading-snug font-semibold ${isChecked ? "line-through text-slate-400" : "text-slate-800"}`}>
+                              {item.task}
+                            </p>
+                            <span className="text-[10px] font-mono text-slate-400 mt-1 block">
+                              Ref: {item.numeralRef}
+                            </span>
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
@@ -152,17 +186,21 @@ export default function ChecklistBolsilloModal({
             })}
           </div>
 
-          {/* Footer */}
-          <div className="p-4 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between text-xs text-slate-400">
-            <span>Guarda automáticamente tu avance en este dispositivo.</span>
+          {/* Footer (Light Theme) */}
+          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+            <p className="text-[11px] text-slate-500 font-medium">
+              Guarda automáticamente tu avance en este dispositivo.
+            </p>
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors"
+              className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-light text-xs font-bold text-white uppercase tracking-wider transition-all cursor-pointer shadow-sm"
             >
               Listo
             </button>
           </div>
+
         </motion.div>
+
       </div>
     </AnimatePresence>
   );

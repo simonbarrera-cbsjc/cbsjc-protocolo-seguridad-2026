@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Lock, Play, CheckCircle, Award, ArrowLeft, ArrowRight, ShieldCheck, Sparkles, ClipboardCheck, BookOpen, KeyRound, Shield } from "lucide-react";
+import { Lock, Play, CheckCircle, Award, ArrowLeft, ArrowRight, ShieldCheck, Sparkles, ClipboardCheck, BookOpen, KeyRound, Shield, RotateCw, Lightbulb } from "lucide-react";
 import { PROTOCOL_MODULES } from "@/lib/protocolData";
 import confetti from "canvas-confetti";
 import ActaConstanciaModal from "@/components/ActaConstanciaModal";
 import ChecklistBolsilloModal from "@/components/ChecklistBolsilloModal";
 import CasosPracticosModal from "@/components/CasosPracticosModal";
 import CarnesVisitantesModal from "@/components/CarnesVisitantesModal";
+import GlosarioRecorridoModal from "@/components/GlosarioRecorridoModal";
 import AsistenteChatSeguridad from "@/components/AsistenteChatSeguridad";
 
 export default function Dashboard() {
@@ -25,6 +26,7 @@ export default function Dashboard() {
   const [isChecklistOpen, setIsChecklistOpen] = useState(false);
   const [isCasosOpen, setIsCasosOpen] = useState(false);
   const [isCarnesOpen, setIsCarnesOpen] = useState(false);
+  const [isGlosarioOpen, setIsGlosarioOpen] = useState(false);
 
   const [progress, setProgress] = useState<Record<string, boolean>>({
     "1": false, "2": false, "3": false, "4": false, "5": false, "6": false
@@ -35,17 +37,34 @@ export default function Dashboard() {
   const TOTAL_MODULES = 6;
 
   useEffect(() => {
-    const storedName = localStorage.getItem("cbsjc_security_worker_name") || localStorage.getItem("rit_worker_name");
-    const storedId = localStorage.getItem("cbsjc_security_worker_id") || localStorage.getItem("rit_worker_id") || "1.115.XXX.XXX";
-    const storedEmail = localStorage.getItem("cbsjc_security_worker_email") || localStorage.getItem("rit_worker_email") || "docente@sanjosebilingue.edu.co";
-    const storedRole = localStorage.getItem("cbsjc_security_worker_role") || localStorage.getItem("rit_worker_role");
+    const storedName =
+      localStorage.getItem("cbsjc_security_worker_name") ||
+      localStorage.getItem("rit_worker_name") ||
+      localStorage.getItem("cbsjc_parent_name") ||
+      localStorage.getItem("cbsjc_worker_name") ||
+      localStorage.getItem("worker_name");
 
-    if (!storedName || !storedRole) {
+    const storedId =
+      localStorage.getItem("cbsjc_security_worker_id") ||
+      localStorage.getItem("rit_worker_id") ||
+      "1.115.XXX.XXX";
+
+    const storedEmail =
+      localStorage.getItem("cbsjc_security_worker_email") ||
+      localStorage.getItem("rit_worker_email") ||
+      "docente@sanjosebilingue.edu.co";
+
+    const storedRole =
+      localStorage.getItem("cbsjc_security_worker_role") ||
+      localStorage.getItem("rit_worker_role") ||
+      "Docente Institucional";
+
+    if (!storedName || storedName.trim().length === 0) {
       router.push("/");
       return;
     }
 
-    setWorkerName(storedName);
+    setWorkerName(storedName.trim());
     setWorkerId(storedId);
     setWorkerEmail(storedEmail);
     setWorkerRole(storedRole);
@@ -109,7 +128,7 @@ export default function Dashboard() {
 
       <div className="mx-auto max-w-5xl space-y-8">
         
-        {/* User Card & Progress Header */}
+        {/* User Card & Progress Header (100% Light Theme) */}
         <div className="rounded-[28px] border border-slate-200 bg-white p-6 sm:p-8 shadow-[0_20px_50px_rgba(11,25,83,0.06)] flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[9px] font-black text-primary uppercase tracking-widest border border-primary/20">
@@ -140,7 +159,35 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Access Modals Bar */}
+        {/* Inducción Previa & Glosario Flashcards Banner */}
+        <div className="rounded-[24px] border border-primary/20 bg-gradient-to-r from-blue-50 via-white to-indigo-50/40 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0">
+              <BookOpen className="w-6 h-6 text-accent" />
+            </div>
+            <div className="space-y-0.5 text-left">
+              <span className="text-[10px] font-black uppercase tracking-widest text-accent bg-accent/10 px-2.5 py-0.5 rounded-full border border-accent/20">
+                Paso 0 · Inducción Previa al Roadmap
+              </span>
+              <h3 className="text-sm sm:text-base font-black text-primary uppercase">
+                Glosario y Conceptos Clave de Seguridad
+              </h3>
+              <p className="text-xs text-text-muted font-medium">
+                Repasa interactivamente los conceptos esenciales: <strong>SEED BLOOM</strong>, Deber de Diligencia, Pickup SJ, Carnés y Conteo continuo.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsGlosarioOpen(true)}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-accent hover:bg-accent-dark text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md hover:scale-[1.02] active:scale-[0.98] shrink-0"
+          >
+            <RotateCw className="w-4 h-4" />
+            <span>Ver Glosario Flashcards</span>
+          </button>
+        </div>
+
+        {/* Quick Access Modals Bar (100% Light Theme) */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           <button
             onClick={() => setIsChecklistOpen(true)}
@@ -393,6 +440,11 @@ export default function Dashboard() {
         workerRole={workerRole}
       />
 
+      <GlosarioRecorridoModal
+        isOpen={isGlosarioOpen}
+        onClose={() => setIsGlosarioOpen(false)}
+      />
+
       <ChecklistBolsilloModal
         isOpen={isChecklistOpen}
         onClose={() => setIsChecklistOpen(false)}
@@ -408,7 +460,7 @@ export default function Dashboard() {
         onClose={() => setIsCarnesOpen(false)}
       />
 
-      {/* Floating Groq Assistant */}
+      {/* Floating Chat Assistant (Only inside logged-in module/dashboard) */}
       <AsistenteChatSeguridad />
     </div>
   );

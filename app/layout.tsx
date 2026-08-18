@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
-import AsistenteChatSeguridad from "@/components/AsistenteChatSeguridad";
 import ScrollToTop from "@/components/ScrollToTop";
 
 export const viewport: Viewport = {
@@ -36,7 +35,6 @@ export default function RootLayout({
             {children}
           </main>
         </div>
-        <AsistenteChatSeguridad />
       </body>
     </html>
   );

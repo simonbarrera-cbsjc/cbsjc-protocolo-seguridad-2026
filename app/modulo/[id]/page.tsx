@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Lightbulb, BookOpen, AlertCircle, Award, Sparkles, CheckCircle2, RefreshCw, ShieldCheck } from "lucide-react";
 import { PROTOCOL_MODULES, Card, CaseStudy, Option } from "@/lib/protocolData";
+import AsistenteChatSeguridad from "@/components/AsistenteChatSeguridad";
 
 import JuegoDeberDiligencia from "@/components/juegos/JuegoDeberDiligencia";
 import JuegoDesplazamientosBanos from "@/components/juegos/JuegoDesplazamientosBanos";
@@ -158,7 +159,7 @@ export default function ModuloRunner() {
                   <Lightbulb className="h-4 w-4 text-accent fill-accent/15" />
                   <span>Puntos Clave a Considerar:</span>
                 </div>
-                <ul className="space-y-2 text-xs sm:text-sm text-text-dark leading-relaxed font-medium list-disc list-inside">
+                <ul className="space-y-2 text-xs sm:text-sm text-text-dark leading-relaxed font-semibold list-disc list-inside">
                   {moduleInfo.intro.keyPoints.map((pt, pIdx) => (
                     <li key={pIdx}>{pt}</li>
                   ))}
@@ -175,7 +176,7 @@ export default function ModuloRunner() {
             </motion.div>
           )}
 
-          {/* STEP 1: Informative Flashcards 3D */}
+          {/* STEP 1: Informative Flashcards 3D (100% Light Institutional Theme) */}
           {step === 1 && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -205,13 +206,13 @@ export default function ModuloRunner() {
                     >
                       <div className={`relative h-full w-full preserve-3d transition-transform duration-500 rounded-[22px] border ${
                         isFlipped 
-                          ? "rotate-y-180 bg-slate-900 text-white border-slate-700 shadow-xl" 
+                          ? "rotate-y-180 bg-blue-50/90 text-text-dark border-primary/30 shadow-md" 
                           : "bg-slate-50 hover:bg-white text-text-dark border-slate-200 hover:border-accent hover:shadow-md shadow-xs"
                       }`}>
                         
                         {/* Front of Card */}
                         <div className="absolute inset-0 backface-hidden p-6 flex flex-col items-center justify-center text-center space-y-3">
-                          <span className="text-[9px] font-mono font-bold text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20">
+                          <span className="text-[9px] font-mono font-bold text-accent bg-accent/10 px-2.5 py-0.5 rounded-full border border-accent/20">
                             {card.numeral || `Tarjeta ${idx + 1}`}
                           </span>
                           <span className="text-xs sm:text-sm font-extrabold text-primary leading-snug">
@@ -222,14 +223,17 @@ export default function ModuloRunner() {
                           </span>
                         </div>
 
-                        {/* Back of Card (Rotated) */}
-                        <div className="absolute inset-0 backface-hidden rotate-y-180 p-5 flex flex-col justify-center text-center bg-slate-900 text-white rounded-[22px] overflow-y-auto custom-scrollbar">
-                          <span className="text-[9px] text-amber-400 font-bold uppercase tracking-widest mb-1.5">
+                        {/* Back of Card (Rotated - 100% Light Theme) */}
+                        <div className="absolute inset-0 backface-hidden rotate-y-180 p-5 flex flex-col justify-center text-center bg-white border border-primary/20 text-slate-800 rounded-[22px] overflow-y-auto custom-scrollbar shadow-inner">
+                          <span className="text-[9px] text-primary font-black uppercase tracking-widest mb-1.5 bg-primary/5 py-1 px-2 rounded-lg border border-primary/10 inline-block mx-auto">
                             {card.category || "Pauta Institucional"}
                           </span>
-                          <p className="text-[11px] sm:text-xs leading-relaxed text-slate-200 font-medium">
+                          <p className="text-[11px] sm:text-xs leading-relaxed text-slate-700 font-semibold mt-1">
                             {card.back}
                           </p>
+                          <span className="text-[9px] text-emerald-600 font-bold mt-2">
+                            ✓ Pauta consultada
+                          </span>
                         </div>
 
                       </div>
@@ -440,6 +444,9 @@ export default function ModuloRunner() {
         </div>
 
       </div>
+
+      {/* Floating Chat Assistant (Only inside logged-in module/dashboard) */}
+      <AsistenteChatSeguridad />
     </div>
   );
 }

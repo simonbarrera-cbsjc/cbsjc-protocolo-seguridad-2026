@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { KeyRound, CheckCircle2, AlertTriangle, RefreshCw, Trophy, ArrowRight, Smartphone, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { KeyRound, CheckCircle2, AlertTriangle, RotateCcw, ArrowRight, Smartphone, ShieldCheck } from "lucide-react";
 import confetti from "canvas-confetti";
 
 interface AccessTest {
@@ -116,191 +115,198 @@ const PRUEBAS_ACCESO: AccessTest[] = [
 ];
 
 export default function JuegoCarnesPickupSJ({ onComplete }: { onComplete: () => void }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const [attempts, setAttempts] = useState(0);
 
-  const currentTest = PRUEBAS_ACCESO[currentIndex];
+  const currentTest = PRUEBAS_ACCESO[currentIdx];
+  const isCorrect = selectedOption !== null && currentTest.options[selectedOption].isCorrect;
 
   const handleSelect = (index: number) => {
-    if (selectedOption !== null) return;
     setSelectedOption(index);
+    setIsAnswered(true);
 
     if (currentTest.options[index].isCorrect) {
-      setScore((prev) => prev + 1);
+      setScore(s => s + 1);
+    } else {
+      setAttempts(a => a + 1);
     }
   };
 
-  const handleNext = useCallback(() => {
+  const handleNext = () => {
+    setIsAnswered(false);
     setSelectedOption(null);
-    if (currentIndex + 1 < PRUEBAS_ACCESO.length) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      setIsFinished(true);
-      if (score + (selectedOption !== null && currentTest.options[selectedOption].isCorrect ? 1 : 0) >= 3) {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        if (!hasCompleted) {
-          setHasCompleted(true);
-          onComplete();
-        }
-      }
-    }
-  }, [currentIndex, selectedOption, currentTest, score, hasCompleted, onComplete]);
 
-  const restartGame = () => {
-    setCurrentIndex(0);
+    if (currentIdx < PRUEBAS_ACCESO.length - 1) {
+      setCurrentIdx(c => c + 1);
+    } else {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      onComplete();
+    }
+  };
+
+  const handleRetry = () => {
+    setIsAnswered(false);
     setSelectedOption(null);
-    setScore(0);
-    setIsFinished(false);
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-xl">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400">
-            <KeyRound className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">Validador de Carnés y Pickup SJ</h3>
-            <p className="text-xs text-slate-400">Control de ingresos por color y despacho seguro</p>
-          </div>
-        </div>
-        <span className="text-xs font-semibold px-3 py-1 bg-rose-950/60 border border-rose-800 text-rose-300 rounded-full">
-          Prueba {currentIndex + 1} de {PRUEBAS_ACCESO.length}
-        </span>
-      </div>
-
-      {!isFinished ? (
-        <div>
-          {/* Situation Box */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-5 mb-5 space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-700/50">
-                {currentTest.type}
-              </span>
-              {currentTest.badgeColor && (
-                <span
-                  className={`text-xs font-bold px-2.5 py-0.5 rounded border ${
-                    currentTest.badgeColor === "ROJO"
-                      ? "bg-red-500/20 text-red-400 border-red-500/40"
-                      : currentTest.badgeColor === "AZUL"
-                      ? "bg-blue-500/20 text-blue-400 border-blue-500/40"
-                      : currentTest.badgeColor === "VERDE"
-                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-                      : "bg-slate-800 text-slate-300 border-slate-600"
-                  }`}
-                >
-                  CARNÉ {currentTest.badgeColor}
-                </span>
-              )}
+    <div className="space-y-6">
+      {/* Gaming Header (Light Theme) */}
+      <div className="relative overflow-hidden rounded-[24px] border border-rose-200 bg-gradient-to-br from-rose-50/80 via-white to-red-50/50 p-5 shadow-xs text-text-dark">
+        <div className="relative flex flex-col sm:flex-row gap-5 items-center">
+          <div className="relative shrink-0">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-600 shadow-xs">
+              <KeyRound className="w-10 h-10" />
             </div>
-            <p className="text-sm text-slate-300">{currentTest.situation}</p>
-            <p className="text-sm sm:text-base text-slate-100 font-bold pt-1">
-              {currentTest.question}
+            <div className="absolute -bottom-2 -right-2 bg-rose-600 font-black text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider text-white shadow-xs">
+              NUM. 11 & 50
+            </div>
+          </div>
+          <div className="text-center sm:text-left space-y-1.5">
+            <span className="inline-block text-[10px] font-black tracking-widest text-rose-800 uppercase bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
+              Minijuego Pedagógico · Módulo 5
+            </span>
+            <h3 className="text-lg font-black uppercase tracking-tight text-primary">
+              Validador de Carnés y Pickup SJ
+            </h3>
+            <p className="text-xs text-text-muted leading-relaxed max-w-xl font-medium">
+              Control estricto de accesos según el color del carné y validación exclusiva por la plataforma digital Pickup SJ.
             </p>
           </div>
+        </div>
+      </div>
 
-          {/* Options */}
-          <div className="space-y-3 mb-6">
-            {currentTest.options.map((opt, idx) => {
-              const isSelected = selectedOption === idx;
-              let btnStyle = "bg-slate-950/50 border-slate-800 hover:border-slate-700 text-slate-300";
+      {/* Game Status Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl text-xs font-bold text-primary shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-rose-600 animate-pulse" />
+          <span className="uppercase tracking-wider">Fase: Control de Accesos y Entregas</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="bg-primary/5 px-3 py-1 rounded-lg">PRUEBA: {currentIdx + 1} / {PRUEBAS_ACCESO.length}</span>
+          <span className="text-slate-300">|</span>
+          <span className="bg-emerald-50 px-3 py-1 rounded-lg text-emerald-700">ACIERTOS: {score}</span>
+          {attempts > 0 && (
+            <>
+              <span className="text-slate-300">|</span>
+              <span className="bg-rose-50 px-3 py-1 rounded-lg text-rose-700">REINTENTOS: {attempts}</span>
+            </>
+          )}
+        </div>
+      </div>
 
-              if (selectedOption !== null) {
-                if (opt.isCorrect) {
-                  btnStyle = "bg-emerald-950/40 border-emerald-500 text-emerald-200 font-medium";
-                } else if (isSelected && !opt.isCorrect) {
-                  btnStyle = "bg-red-950/40 border-red-500 text-red-200";
-                } else {
-                  btnStyle = "opacity-40 border-slate-800 text-slate-500";
-                }
-              }
+      {/* Progress indicators */}
+      <div className="flex justify-center gap-2">
+        {PRUEBAS_ACCESO.map((_, qIdx) => (
+          <div
+            key={qIdx}
+            className={`h-2 rounded-full transition-all ${
+              qIdx === currentIdx 
+                ? "w-12 bg-accent" 
+                : qIdx < currentIdx 
+                  ? "w-6 bg-rose-600" 
+                  : "w-6 bg-slate-200"
+            }`}
+          />
+        ))}
+      </div>
 
-              return (
-                <button
-                  key={idx}
-                  onClick={() => handleSelect(idx)}
-                  disabled={selectedOption !== null}
-                  className={`w-full p-4 rounded-xl border text-left text-sm transition-all flex items-start gap-3 ${btnStyle}`}
-                >
-                  <span className="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                    {String.fromCharCode(65 + idx)}
-                  </span>
-                  <span className="flex-1 leading-relaxed">{opt.text}</span>
-                </button>
-              );
-            })}
-          </div>
+      {/* Situation Card */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xs space-y-2 text-left relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-rose-500 to-primary" />
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-black uppercase tracking-wider text-rose-800 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
+            {currentTest.type}
+          </span>
+          {currentTest.badgeColor && (
+            <span
+              className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${
+                currentTest.badgeColor === "ROJO"
+                  ? "bg-red-50 text-red-700 border-red-200"
+                  : currentTest.badgeColor === "AZUL"
+                  ? "bg-blue-50 text-blue-700 border-blue-200"
+                  : currentTest.badgeColor === "VERDE"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : "bg-slate-100 text-slate-800 border-slate-300"
+              }`}
+            >
+              CARNÉ {currentTest.badgeColor}
+            </span>
+          )}
+        </div>
+        <p className="text-xs sm:text-sm text-slate-600 font-medium">
+          {currentTest.situation}
+        </p>
+        <p className="text-sm font-bold text-slate-800 leading-relaxed sm:text-base pt-1">
+          {currentTest.question}
+        </p>
+      </div>
 
-          {/* Feedback */}
-          <AnimatePresence>
-            {selectedOption !== null && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`p-4 rounded-xl border flex flex-col gap-2 mb-4 ${
-                  currentTest.options[selectedOption].isCorrect
-                    ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-200"
-                    : "bg-red-950/30 border-red-700/50 text-red-200"
-                }`}
-              >
-                <div className="flex items-center gap-2 text-xs font-bold">
-                  {currentTest.options[selectedOption].isCorrect ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  ) : (
-                    <AlertTriangle className="w-4 h-4 text-red-400" />
-                  )}
-                  <span>
-                    {currentTest.options[selectedOption].isCorrect
-                      ? "¡Autorización Validada con Éxito!"
-                      : "Vulnerabilidad de Seguridad Detectada:"}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  {currentTest.options[selectedOption].explanation}
-                </p>
-                <button
-                  onClick={handleNext}
-                  className="self-end mt-2 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-lg"
-                >
-                  <span>Siguiente Caso</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+      {/* Option Buttons */}
+      {!isAnswered ? (
+        <div className="space-y-3">
+          {currentTest.options.map((opt, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSelect(idx)}
+              className="w-full p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white hover:border-rose-500 hover:bg-rose-50/20 transition-all text-left text-xs sm:text-sm font-bold text-slate-800 flex items-start gap-3.5 shadow-xs cursor-pointer active:scale-[0.99]"
+            >
+              <span className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
+                {String.fromCharCode(65 + idx)}
+              </span>
+              <span className="flex-1 leading-relaxed">{opt.text}</span>
+            </button>
+          ))}
         </div>
       ) : (
-        <div className="text-center py-8">
-          <div className="w-16 h-16 rounded-full bg-rose-500/20 border border-rose-500/40 mx-auto flex items-center justify-center text-rose-400 mb-4">
-            <Trophy className="w-8 h-8" />
+        <div className="space-y-4 animate-fade-in">
+          {/* Answer Feedback Alert */}
+          <div className={`rounded-2xl border p-5 flex gap-4 ${
+            isCorrect 
+              ? "bg-emerald-50 border-emerald-300 text-emerald-900" 
+              : "bg-rose-50 border-rose-300 text-rose-900"
+          }`}>
+            <div className="flex-shrink-0">
+              {isCorrect ? (
+                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <CheckCircle2 className="h-6 w-6 stroke-[2.5]" />
+                </div>
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                  <AlertTriangle className="h-6 w-6 stroke-[2.5]" />
+                </div>
+              )}
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-sm font-black uppercase tracking-wider">
+                {isCorrect ? "¡Autorización Validada con Éxito!" : "Vulnerabilidad de Seguridad Detectada:"}
+              </h4>
+              <p className="text-xs leading-relaxed font-semibold">
+                {currentTest.options[selectedOption!].explanation}
+              </p>
+            </div>
           </div>
-          <h4 className="text-2xl font-black text-white mb-2">
-            {score >= 3 ? "¡Control de Acceso y Pickup Dominado!" : "Refuerza Carnés y Pickup SJ"}
-          </h4>
-          <p className="text-slate-300 text-sm max-w-md mx-auto mb-6">
-            Puntaje: <strong className="text-white">{score} de {PRUEBAS_ACCESO.length}</strong> pruebas de acceso correctas.
-            {score >= 3
-              ? " Tienes claridad sobre el código de carnés y la prohibición total de canales informales de entrega."
-              : " Recuerda que WhatsApp no es válido y los carnés rojos nunca ingresan a pasillos escolares."}
-          </p>
-          <div className="flex justify-center gap-4">
-            {score < 3 ? (
+
+          <div className="flex justify-end">
+            {isCorrect ? (
               <button
-                onClick={restartGame}
-                className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-sm font-semibold flex items-center gap-2 border border-slate-700 transition-colors"
+                onClick={handleNext}
+                className="w-full sm:w-auto rounded-xl bg-primary px-8 py-4 font-black text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-light hover:shadow-xl active:scale-[0.98] cursor-pointer text-xs uppercase tracking-widest flex items-center justify-center gap-2"
               >
-                <RefreshCw className="w-4 h-4" />
-                Reintentar
+                <span>{currentIdx < PRUEBAS_ACCESO.length - 1 ? "Siguiente Caso" : "Finalizar Reto"}</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-950/60 border border-emerald-600/50 rounded-xl text-emerald-300 text-sm font-bold">
-                <CheckCircle2 className="w-4 h-4" />
-                Módulo 5 Completado
-              </div>
+              <button
+                onClick={handleRetry}
+                className="w-full sm:w-auto rounded-xl bg-accent px-8 py-4 font-black text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent-dark hover:shadow-xl active:scale-[0.98] cursor-pointer text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Reintentar Caso</span>
+              </button>
             )}
           </div>
         </div>

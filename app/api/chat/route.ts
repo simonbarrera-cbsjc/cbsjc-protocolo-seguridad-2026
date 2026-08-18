@@ -31,26 +31,44 @@ export async function POST(req: NextRequest) {
 
 Tu objetivo es asesorar a los docentes, directores de grupo y personal institucional sobre las normas de custodia, desplazamientos, zonas de acompañamiento, programa SEED BLOOM, uso de baños, código de carnés de visitantes, aplicativo Pickup SJ Campestre y cadena de comunicación obligatoria.
 
-INSTRUCCIONES CLAVE:
-1. Responde de forma concisa, precisa, empática y profesional en español.
-2. Cita siempre que sea posible el numeral o sección del protocolo aplicable (ej. Numeral 56 para deber de diligencia, Numeral 44 y 45 para baños, Numeral 49 para zonas de descanso, Numeral 11.1 para Pickup SJ Campestre, Numeral 22 para cadena de comunicación).
-3. Si un docente te pregunta sobre situaciones con acudientes por WhatsApp, recuérdale con firmeza que los mensajes personales NO son válidos y que todo se canaliza por Pickup SJ Campestre o Coordinación.
-4. Si te preguntan sobre instructores externos (SEED BLOOM, artes, deportes), aclara que el docente institucional NUNCA queda relevado de su deber de supervisión.
-5. Sé directo, estructurado y enfocado en la prevención y protección de los menores.
+REGLAS DE FORMATO Y REDACCIÓN (CRÍTICO):
+1. NO UTILICES FORMATO MARKDOWN EN TUS RESPUESTAS. No uses asteriscos (**negrita** ni *cursiva*), no uses almohadillas (### títulos), no uses backticks (\`código\`), ni guiones para listas markdown (- item).
+2. Escribe en texto plano, natural, limpio y altamente legible en español, usando párrafos breves, saltos de línea claros y numeraciones sencillas (1., 2., 3.) o viñetas simples con puntos (•).
+3. Responde de forma concisa, precisa, empática y profesional.
+4. Cita siempre que sea posible el numeral o sección del protocolo aplicable (ejemplo: Numeral 56 para deber de diligencia, Numeral 44 y 45 para baños, Numeral 49 para zonas de descanso, Numeral 11.1 para Pickup SJ Campestre, Numeral 22 para cadena de comunicación).
+5. Si un docente te pregunta sobre situaciones con acudientes por WhatsApp, recuérdale con firmeza que los mensajes personales no son válidos y que todo se canaliza exclusivamente por Pickup SJ Campestre o Coordinación.
+6. Si te preguntan sobre instructores externos (SEED BLOOM, artes, deportes), aclara que el docente institucional nunca queda relevado de su deber de supervisión.
+7. Si el usuario te hace una pregunta directa de selección múltiple o te pide resolver un caso específico, analiza las opciones y responde con la opción correcta y su justificación normativa clara.
 
 CONTEXTO INSTITUCIONAL COMPLETO (SJB-RGD003 V2):
 ${PROTOCOL_CONTEXT}
 `
     };
 
-    const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [systemPrompt, ...formattedMessages],
-      temperature: 0.1,
-      max_tokens: 800,
-    });
+    let response;
+    try {
+      response = await groq.chat.completions.create({
+        model: "openai/gpt-oss-120b",
+        messages: [systemPrompt, ...formattedMessages],
+        temperature: 0.1,
+        max_tokens: 800,
+      });
+    } catch {
+      response = await groq.chat.completions.create({
+        model: "openai/gpt-oss-20b",
+        messages: [systemPrompt, ...formattedMessages],
+        temperature: 0.1,
+        max_tokens: 800,
+      });
+    }
 
-    const content = response.choices[0]?.message?.content || "";
+    let content = response.choices[0]?.message?.content || "";
+    // Clean any accidental markdown artifacts
+    content = content
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+      .replace(/#{1,6}\s?/g, "")
+      .replace(/`{1,3}(.*?)`{1,3}/g, "$1");
 
     return NextResponse.json({ content });
   } catch (error: unknown) {

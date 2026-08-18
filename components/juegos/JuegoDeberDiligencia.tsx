@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, XCircle, ShieldCheck, RefreshCw, Trophy, AlertTriangle, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, AlertTriangle, ShieldCheck, Award, ArrowRight, RotateCcw } from "lucide-react";
 import confetti from "canvas-confetti";
 
 interface Question {
@@ -19,258 +18,235 @@ const CONDUCTAS: Question[] = [
     statement: "Atender una llamada telefónica urgente mientras superviso a mi grupo en el patio.",
     isCorrectBehavior: false,
     numeral: "Numeral 56",
-    explanation: "NO HACER. El celular no debe usarse de forma que comprometa la vigilancia activa."
+    explanation: "NO HACER. El celular no debe usarse de forma que comprometa la vigilancia activa sobre los estudiantes."
   },
   {
     id: 2,
     statement: "Realizar conteo de estudiantes al salir del salón, al llegar al destino y al finalizar la actividad.",
     isCorrectBehavior: true,
     numeral: "Idea Fuerza 2 & Num. 41",
-    explanation: "SÍ HACER. La rutina de conteo permanente garantiza saber la ubicación del grupo siempre."
+    explanation: "SÍ HACER. La rutina de conteo continuo en tres tiempos garantiza saber la ubicación exacta del grupo siempre."
   },
   {
     id: 3,
     statement: "Dejar al grupo solo 3 minutos mientras bajo rápidamente a secretaría a recoger una guía.",
     isCorrectBehavior: false,
     numeral: "Numeral 56",
-    explanation: "NO HACER. Prohibido abandonar el grupo sin solicitar y recibir relevo formal autorizado."
+    explanation: "NO HACER. Queda terminantemente prohibido abandonar el grupo sin solicitar y recibir relevo formal autorizado."
   },
   {
     id: 4,
     statement: "Mantener supervisión activa del grupo en SEED BLOOM aunque el instructor dirija la monta.",
     isCorrectBehavior: true,
     numeral: "Idea Fuerza 3 & Num. 47",
-    explanation: "SÍ HACER. La presencia de un instructor externo no releva al docente de su responsabilidad funcional."
+    explanation: "SÍ HACER. La presencia de un instructor técnico externo no releva al docente institucional de su deber de custodia."
   },
   {
     id: 5,
     statement: "Acordar de palabra con un colega que me cubra la zona de patio sin avisar a Coordinación.",
     isCorrectBehavior: false,
     numeral: "Numeral 49 & 56",
-    explanation: "NO HACER. Los acuerdos informales rompen la trazabilidad del esquema de custodia institucional."
+    explanation: "NO HACER. Los acuerdos informales rompen la trazabilidad de custodia y configuran culpa atribuible al docente asignado."
   },
   {
     id: 6,
     statement: "Cronometrar y verificar el retorno oportuno de un estudiante con permiso de baño.",
     isCorrectBehavior: true,
     numeral: "Numeral 42 & 56",
-    explanation: "SÍ HACER. Permite detectar ausencias prolongadas y activar el reporte inmediatamente."
+    explanation: "SÍ HACER. Permite detectar ausencias prolongadas (más de 10 min) y activar la verificación de inmediato."
   },
   {
     id: 7,
     statement: "Autorizar por WhatsApp que una tía recoja a un alumno si la mamá me lo pide amablemente.",
     isCorrectBehavior: false,
     numeral: "Idea Fuerza 5 & Num. 11.1",
-    explanation: "NO HACER. Las autorizaciones van 100% por Pickup SJ Campestre. WhatsApp carece de validez."
+    explanation: "NO HACER. Las autorizaciones operan exclusivamente por Pickup SJ Campestre. WhatsApp carece de validez jurídica."
   },
   {
     id: 8,
     statement: "Reportar a Coordinación una caída o raspadura leve el mismo día, aunque el alumno diga que está bien.",
     isCorrectBehavior: true,
     numeral: "Idea Fuerza 4 & Num. 36",
-    explanation: "SÍ HACER. El reporte inmediato de toda novedad es obligatorio para respaldo y trazabilidad."
+    explanation: "SÍ HACER. El reporte formal inmediato de toda novedad con los 6 datos mínimos es obligatorio para respaldo y trazabilidad."
   }
 ];
 
 export default function JuegoDeberDiligencia({ onComplete }: { onComplete: () => void }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [selectedChoice, setSelectedChoice] = useState<boolean | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [isLastAnswerCorrect, setIsLastAnswerCorrect] = useState(false);
-  const [isFinished, setIsFinished] = useState(false);
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const [attempts, setAttempts] = useState(0);
 
-  const currentQuestion = CONDUCTAS[currentIndex];
+  const currentQuestion = CONDUCTAS[currentIdx];
+  const isCorrect = selectedChoice === currentQuestion.isCorrectBehavior;
 
   const handleChoice = (chosenAsProper: boolean) => {
-    if (showFeedback) return;
+    setSelectedChoice(chosenAsProper);
+    setIsAnswered(true);
 
-    const correct = chosenAsProper === currentQuestion.isCorrectBehavior;
-    setIsLastAnswerCorrect(correct);
-    if (correct) {
-      setScore((prev) => prev + 1);
+    if (chosenAsProper === currentQuestion.isCorrectBehavior) {
+      setScore(s => s + 1);
+    } else {
+      setAttempts(a => a + 1);
     }
-    setShowFeedback(true);
   };
 
-  const handleNext = useCallback(() => {
-    setShowFeedback(false);
-    if (currentIndex + 1 < CONDUCTAS.length) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      setIsFinished(true);
-      if (score + (isLastAnswerCorrect ? 1 : 0) >= 6) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-        if (!hasCompleted) {
-          setHasCompleted(true);
-          onComplete();
-        }
-      }
-    }
-  }, [currentIndex, isLastAnswerCorrect, score, hasCompleted, onComplete]);
+  const handleNext = () => {
+    setIsAnswered(false);
+    setSelectedChoice(null);
 
-  const restartGame = () => {
-    setCurrentIndex(0);
-    setScore(0);
-    setShowFeedback(false);
-    setIsFinished(false);
+    if (currentIdx < CONDUCTAS.length - 1) {
+      setCurrentIdx(c => c + 1);
+    } else {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      onComplete();
+    }
+  };
+
+  const handleRetry = () => {
+    setIsAnswered(false);
+    setSelectedChoice(null);
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-xl">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
-            <ShieldCheck className="w-5 h-5" />
+    <div className="space-y-6">
+      {/* Gaming Arcade Screen Header (100% Light Theme) */}
+      <div className="relative overflow-hidden rounded-[24px] border border-blue-200 bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/50 p-5 shadow-xs text-text-dark">
+        <div className="relative flex flex-col sm:flex-row gap-5 items-center">
+          <div className="relative shrink-0">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
+              <ShieldCheck className="w-10 h-10 text-accent" />
+            </div>
+            <div className="absolute -bottom-2 -right-2 bg-accent font-black text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider text-white shadow-xs">
+              NUM. 56
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">Simulador del Deber de Diligencia</h3>
-            <p className="text-xs text-slate-400">Clasifica cada conducta según el Numeral 56</p>
+          <div className="text-center sm:text-left space-y-1.5">
+            <span className="inline-block text-[10px] font-black tracking-widest text-primary uppercase bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
+              Minijuego Pedagógico · Módulo 1
+            </span>
+            <h3 className="text-lg font-black uppercase tracking-tight text-primary">
+              Simulador del Deber de Diligencia
+            </h3>
+            <p className="text-xs text-text-muted leading-relaxed max-w-xl font-medium">
+              Clasifica cada situación de la jornada escolar como <strong>SÍ HACER</strong> (conducta diligente) o <strong>NO HACER</strong> (omisión riesgosa) conforme al Numeral 56.
+            </p>
           </div>
-        </div>
-        <div className="text-right">
-          <span className="text-xs font-semibold px-3 py-1 bg-blue-950/60 border border-blue-800 text-blue-300 rounded-full">
-            {currentIndex + 1} de {CONDUCTAS.length}
-          </span>
         </div>
       </div>
 
-      {!isFinished ? (
-        <div>
-          {/* Progress Bar */}
-          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-6">
-            <div
-              className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full transition-all duration-300"
-              style={{ width: `${((currentIndex + 1) / CONDUCTAS.length) * 100}%` }}
-            />
-          </div>
+      {/* Game Status Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl text-xs font-bold text-primary shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-blue-600 animate-pulse" />
+          <span className="uppercase tracking-wider">Fase: Clasificación de Conductas</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="bg-primary/5 px-3 py-1 rounded-lg">CONDUCTA: {currentIdx + 1} / {CONDUCTAS.length}</span>
+          <span className="text-slate-300">|</span>
+          <span className="bg-emerald-50 px-3 py-1 rounded-lg text-emerald-700">ACIERTOS: {score}</span>
+          {attempts > 0 && (
+            <>
+              <span className="text-slate-300">|</span>
+              <span className="bg-rose-50 px-3 py-1 rounded-lg text-rose-700">REINTENTOS: {attempts}</span>
+            </>
+          )}
+        </div>
+      </div>
 
-          {/* Conduct Card */}
-          <motion.div
-            key={currentIndex}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            className="bg-slate-950/70 border border-slate-800 rounded-xl p-6 mb-6 text-center min-h-[160px] flex flex-col justify-center items-center"
+      {/* Progress indicators */}
+      <div className="flex justify-center gap-2">
+        {CONDUCTAS.map((_, qIdx) => (
+          <div
+            key={qIdx}
+            className={`h-2 rounded-full transition-all ${
+              qIdx === currentIdx 
+                ? "w-12 bg-accent" 
+                : qIdx < currentIdx 
+                  ? "w-6 bg-primary" 
+                  : "w-6 bg-slate-200"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Card Content (Light Theme) */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs min-h-[160px] flex flex-col justify-center text-center relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary to-accent" />
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <span className="text-[10px] font-mono font-bold text-accent bg-accent/10 px-2.5 py-0.5 rounded-full border border-accent/20">
+            {currentQuestion.numeral}
+          </span>
+        </div>
+        <p className="text-sm font-bold text-slate-800 leading-relaxed sm:text-base px-2">
+          &ldquo;{currentQuestion.statement}&rdquo;
+        </p>
+      </div>
+
+      {/* Option Buttons */}
+      {!isAnswered ? (
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            onClick={() => handleChoice(true)}
+            className="rounded-xl border-2 border-emerald-600 bg-white py-4 text-xs sm:text-sm font-black text-emerald-700 shadow-sm transition-all hover:bg-emerald-600 hover:text-white hover:scale-[1.01] active:scale-[0.98] cursor-pointer tracking-wider"
           >
-            <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/50 px-2.5 py-0.5 rounded mb-3 border border-indigo-800/60">
-              {currentQuestion.numeral}
-            </span>
-            <p className="text-lg sm:text-xl font-medium text-slate-100 leading-relaxed max-w-xl">
-              &quot;{currentQuestion.statement}&quot;
-            </p>
-          </motion.div>
-
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={() => handleChoice(true)}
-              disabled={showFeedback}
-              className={`py-4 px-6 rounded-xl font-bold flex items-center justify-center gap-3 transition-all border ${
-                showFeedback
-                  ? currentQuestion.isCorrectBehavior
-                    ? "bg-emerald-600/30 border-emerald-500 text-emerald-300"
-                    : "opacity-40 border-slate-800 bg-slate-900 text-slate-500"
-                  : "bg-emerald-950/40 hover:bg-emerald-900/60 border-emerald-700/60 text-emerald-300 hover:scale-[1.02] active:scale-[0.98]"
-              }`}
-            >
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-              <span>SÍ HACER</span>
-            </button>
-
-            <button
-              onClick={() => handleChoice(false)}
-              disabled={showFeedback}
-              className={`py-4 px-6 rounded-xl font-bold flex items-center justify-center gap-3 transition-all border ${
-                showFeedback
-                  ? !currentQuestion.isCorrectBehavior
-                    ? "bg-red-600/30 border-red-500 text-red-300"
-                    : "opacity-40 border-slate-800 bg-slate-900 text-slate-500"
-                  : "bg-red-950/40 hover:bg-red-900/60 border-red-700/60 text-red-300 hover:scale-[1.02] active:scale-[0.98]"
-              }`}
-            >
-              <XCircle className="w-5 h-5 text-red-400" />
-              <span>NO HACER</span>
-            </button>
-          </div>
-
-          {/* Feedback Section */}
-          <AnimatePresence>
-            {showFeedback && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className={`mt-6 p-4 rounded-xl border flex flex-col gap-3 ${
-                  isLastAnswerCorrect
-                    ? "bg-emerald-950/40 border-emerald-700/50 text-emerald-200"
-                    : "bg-red-950/40 border-red-700/50 text-red-200"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  {isLastAnswerCorrect ? (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                  ) : (
-                    <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
-                  )}
-                  <span className="font-bold text-sm">
-                    {isLastAnswerCorrect ? "¡Decisión Correcta!" : "Atención con el Protocolo:"}
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  {currentQuestion.explanation}
-                </p>
-                <button
-                  onClick={handleNext}
-                  className="self-end mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-lg"
-                >
-                  <span>Siguiente</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            ✓ SÍ HACER
+          </button>
+          <button
+            onClick={() => handleChoice(false)}
+            className="rounded-xl border-2 border-rose-600 bg-white py-4 text-xs sm:text-sm font-black text-rose-700 shadow-sm transition-all hover:bg-rose-600 hover:text-white hover:scale-[1.01] active:scale-[0.98] cursor-pointer tracking-wider"
+          >
+            ✕ NO HACER
+          </button>
         </div>
       ) : (
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="text-center py-8"
-        >
-          <div className="w-16 h-16 rounded-full bg-indigo-500/20 border border-indigo-500/40 mx-auto flex items-center justify-center text-indigo-400 mb-4">
-            <Trophy className="w-8 h-8" />
+        <div className="space-y-4 animate-fade-in">
+          {/* Answer Feedback Alert */}
+          <div className={`rounded-2xl border p-5 flex gap-4 ${
+            isCorrect 
+              ? "bg-emerald-50 border-emerald-300 text-emerald-900" 
+              : "bg-rose-50 border-rose-300 text-rose-900"
+          }`}>
+            <div className="flex-shrink-0">
+              {isCorrect ? (
+                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <CheckCircle2 className="h-6 w-6 stroke-[2.5]" />
+                </div>
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                  <AlertTriangle className="h-6 w-6 stroke-[2.5]" />
+                </div>
+              )}
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-sm font-black uppercase tracking-wider">
+                {isCorrect ? "¡Decisión Correcta!" : "Atención con el Protocolo Institucional:"}
+              </h4>
+              <p className="text-xs leading-relaxed font-semibold">{currentQuestion.explanation}</p>
+            </div>
           </div>
-          <h4 className="text-2xl font-black text-white mb-2">
-            {score >= 6 ? "¡Excelente Dominio de Diligencia!" : "Se requiere Repaso Normativo"}
-          </h4>
-          <p className="text-slate-300 text-sm max-w-md mx-auto mb-6">
-            Obtuviste <strong className="text-white">{score} de {CONDUCTAS.length}</strong> respuestas correctas.
-            {score >= 6
-              ? " Has demostrado criterio alineado con el estándar de diligencia docente exigible."
-              : " Revisa los numerales 1, 2 y 56 para afianzar las conductas institucionales."}
-          </p>
 
-          <div className="flex justify-center gap-4">
-            {score < 6 ? (
+          <div className="flex justify-end">
+            {isCorrect ? (
               <button
-                onClick={restartGame}
-                className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-sm font-semibold flex items-center gap-2 border border-slate-700 transition-colors"
+                onClick={handleNext}
+                className="w-full sm:w-auto rounded-xl bg-primary px-8 py-4 font-black text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-light hover:shadow-xl active:scale-[0.98] cursor-pointer text-xs uppercase tracking-widest flex items-center justify-center gap-2"
               >
-                <RefreshCw className="w-4 h-4" />
-                Reintentar Simulador
+                <span>{currentIdx < CONDUCTAS.length - 1 ? "Siguiente Conducta" : "Finalizar Reto"}</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-950/60 border border-emerald-600/50 rounded-xl text-emerald-300 text-sm font-bold">
-                <CheckCircle2 className="w-4 h-4" />
-                Minijuego Superado con Éxito
-              </div>
+              <button
+                onClick={handleRetry}
+                className="w-full sm:w-auto rounded-xl bg-accent px-8 py-4 font-black text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent-dark hover:shadow-xl active:scale-[0.98] cursor-pointer text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Reintentar Conducta</span>
+              </button>
             )}
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );
