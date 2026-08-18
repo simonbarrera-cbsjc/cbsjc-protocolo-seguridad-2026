@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, ChevronDown, CheckCircle2, Search, Filter } from "lucide-react";
+import { X, BookOpen, ChevronDown, CheckCircle2, Search, Download, Loader2 } from "lucide-react";
+import { toPng } from "html-to-image";
+import jsPDF from "jspdf";
 
 interface CaseItem {
   id: number;
@@ -58,57 +61,57 @@ const CASOS_ANEXO_B: CaseItem[] = [
     id: 6,
     title: "Caso 6: Solicitud de baño por parte de un conductor de ruta",
     category: "Visitantes y Salidas",
-    facts: "Un conductor de transporte escolar solicita entrar al baño de estudiantes ubicado en el bloque de primaria antes del despacho de la tarde.",
-    protocolAnalysis: "Aplicación del Numeral 45. Los baños de estudiantes son de uso EXCLUSIVO de menores matriculados. El conductor debe ser remitido a la batería de baños de uso general o del personal administrativo.",
-    numeral: "Numeral 45"
+    facts: "Un conductor de transporte escolar contratado ingresa al colegio a las 11:30 a.m. a usar el baño de estudiantes del edificio de primaria mientras los niños están en clase.",
+    protocolAnalysis: "Violación del Numeral 45. Todo adulto externo debe usar exclusivamente los baños para adultos/visitantes ubicados en portería o área administrativa. Está terminantemente prohibido el ingreso de adultos a baterías sanitarias infantiles.",
+    numeral: "Numerales 45 y 56"
   },
   {
     id: 7,
-    title: "Caso 7: Estudiante sin ubicar tras el cambio de clase",
+    title: "Caso 7: Extravío temporal durante traslado a cancha",
     category: "Desplazamientos",
-    facts: "Al sonar el timbre de cambio de hora, la docente cuenta su grupo en el salón y nota la falta de 1 estudiante de 6.°. Pasan 12 minutos de búsqueda individual sin éxito.",
-    protocolAnalysis: "Aplicación del Numeral 43. Ante la no ubicación de un alumno por más de 10 minutos, debe notificarse formalmente a Coordinación para desplegar la búsqueda perimetral institucional.",
-    numeral: "Numerales 43 y 22"
+    facts: "Un grupo de 1.° de primaria se desplaza del salón a la cancha de fútbol. Al llegar, el docente nota que faltan 2 estudiantes que se quedaron en la fuente de agua.",
+    protocolAnalysis: "Falla en la rutina de conteo en 3 tiempos (Num. 41). El conteo debe realizarse inmediatamente al salir del aula y al ingresar a la zona de destino, caminando con el grupo ordenado y vigilando la retaguardia.",
+    numeral: "Idea Fuerza 2 y Numeral 41"
   },
   {
     id: 8,
-    title: "Caso 8: Desplazamiento no reportado a la huerta escolar",
-    category: "Desplazamientos",
-    facts: "Un docente de ciencias decide llevar de forma espontánea a su grupo a la huerta sin avisar a Coordinación ni coordinar el uso de herramientas.",
-    protocolAnalysis: "Violación del Numeral 46 y 48. Toda salida del aula a espacios abiertos exige coordinación previa, diligenciamiento de trazabilidad y conteo estricto antes, durante y después.",
-    numeral: "Numerales 46, 48 y 41"
+    title: "Caso 8: Reporte de novedad al día siguiente",
+    category: "Urgencias y Salud",
+    facts: "Un estudiante sufre un golpe en la cabeza jugando fútbol a las 10:15 a.m. La docente le pone hielo y el estudiante sigue jugando normal. La docente decide no pasar reporte escrito porque 'no fue nada grave' y planea contarlo al día siguiente en el comité.",
+    protocolAnalysis: "Incumplimiento grave de la Idea Fuerza 4 y Numeral 36. Todo golpe en la cabeza o novedad debe reportarse formalmente el MISMO DÍA antes de finalizar la jornada, informando a Enfermería, Coordinación y Acudientes.",
+    numeral: "Idea Fuerza 4, Numeral 36 y 37"
   },
   {
     id: 9,
-    title: "Caso 9: Niño de preescolar sin recoger a las 3:45 p.m.",
+    title: "Caso 9: Niño de Preescolar que sale del aula sin aviso",
     category: "Preescolar",
-    facts: "Un alumno de Kínder queda rezagado en portería tras el fin de la jornada vehicular. La docente titular se retira a su casa dejando al niño solo con el vigilante.",
-    protocolAnalysis: "Violación de la Protección Reforzada (Num. 57) y Numeral 13. El menor rezagado debe quedar bajo custodia del docente de guardia o Coordinación, registrando en acta el retraso y contactando a los acudientes según el protocolo de entregas tardías.",
-    numeral: "Numerales 13 y 57"
+    facts: "En Kínder, mientras la docente reparte material en las mesas, un niño sale al corredor siguiendo una mariposa sin que nadie lo note durante 4 minutos.",
+    protocolAnalysis: "Aplicación del Numeral 43 y 56. En Preescolar la ratio de supervisión y control de puertas debe ser continua. Las puertas deben permanecer bajo control visual y el conteo visual de cabezas debe ser constante.",
+    numeral: "Numerales 43 y 56"
   },
   {
     id: 10,
-    title: "Caso 10: Caída en gradería y omisión de reporte",
-    category: "Urgencias y Salud",
-    facts: "Un estudiante se golpea la rodilla en el descanso. El docente de zona lo envía a lavarse la cara y el estudiante dice que 'ya no le duele'. Por la noche, el padre lleva al niño a urgencias por fractura y reclama al colegio.",
-    protocolAnalysis: "Incumplimiento de la Idea Fuerza 4 y Numeral 36. Todo incidente con dolor, golpe o caída debe remitirse a enfermería y quedar consignado en el reporte de seguridad del día, sin importar la manifestación inicial del estudiante.",
-    numeral: "Idea Fuerza 4, Num. 36 y 22"
+    title: "Caso 10: Descanso en zona de baja visibilidad",
+    category: "Zonas y Patios",
+    facts: "Durante el recreo, tres estudiantes de bachillerato se reúnen detrás del coliseo en un punto ciego para manipular un encendedor. El docente de la zona 6 permaneció sentado en la banca central.",
+    protocolAnalysis: "Violación del Numeral 49.3 y 49.4. El acompañamiento en patios exige 'recorrido perimetral activo' y vigilancia prioritaria de puntos ciegos, esquinas y accesos a baños.",
+    numeral: "Numerales 49.3 y 49.4"
   },
   {
     id: 11,
-    title: "Caso 11: Solicitud de acudiente para revisar cámaras",
-    category: "Urgencias y Salud",
-    facts: "Un padre de familia exige a la directora de grupo que le muestre los videos del circuito cerrado de televisión del patio donde su hijo perdió una chaqueta.",
-    protocolAnalysis: "Aplicación de los Numerales 52 y 53. El acceso y revisión de grabaciones es confidencial y de potestad exclusiva de Rectoría. La docente debe orientar al padre a radicar su solicitud ante la dirección institucional.",
-    numeral: "Numerales 52 y 53"
+    title: "Caso 11: Acudiente molesto que ingresa sin carné",
+    category: "Visitantes y Salidas",
+    facts: "Un padre de familia entra por la portería sin registrarse aprovechando que se abrió el portón vehicular y se dirige directamente al salón de su hijo a reclamarle a la docente por una nota.",
+    protocolAnalysis: "Violación del Numeral 7, 8 y 16. Ningún visitante puede circular sin carné asignado ni cita previa. La docente debe mantener la calma, no permitir la interrupción de la clase y solicitar apoyo inmediato de Coordinación / Portería.",
+    numeral: "Numerales 7, 8, 16 y 22"
   },
   {
     id: 12,
-    title: "Caso 12: Intento de entrega en contingencia sin documento",
+    title: "Caso 12: Pérdida de un carné de visitante",
     category: "Visitantes y Salidas",
-    facts: "Se cae el fluido eléctrico y falla el sistema Pickup SJ. Llega una vecina a recoger a dos estudiantes diciendo ser enviada por los padres, pero no porta cédula ni aparece registrada en la ficha física de emergencia.",
-    protocolAnalysis: "Aplicación del Protocolo Manual de Contingencia (Num. 27 y 28). En caso de falla tecnológica, no se entrega a ningún menor sin cotejo contra la planilla física de autorizados y documento de identidad. Coordinación debe comunicarse telefónicamente con los padres para validar.",
-    numeral: "Numerales 26, 27 y 28"
+    facts: "Un contratista sale del colegio y afirma haber extraviado el carné amarillo de mantenimiento que le fue entregado en la mañana.",
+    protocolAnalysis: "Aplicación del Numeral 7.4. Portería debe registrar el incidente, retener la identificación del visitante hasta verificar con Coordinación y activar el reporte de reposición y anulación del número de carné.",
+    numeral: "Numerales 7.4 y 36"
   }
 ];
 
@@ -122,53 +125,111 @@ export default function CasosPracticosModal({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("Todos");
   const [expandedId, setExpandedId] = useState<number | null>(1);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  if (!isOpen) return null;
 
   const categories = ["Todos", "Desplazamientos", "Zonas y Patios", "Visitantes y Salidas", "Urgencias y Salud", "Preescolar"];
 
   const filteredCases = CASOS_ANEXO_B.filter((c) => {
+    const matchesCat = selectedCategory === "Todos" || c.category === selectedCategory;
     const matchesSearch =
       c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.facts.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.protocolAnalysis.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.numeral.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesCategory = selectedCategory === "Todos" || c.category === selectedCategory;
-
-    return matchesSearch && matchesCategory;
+    return matchesCat && matchesSearch;
   });
 
-  if (!isOpen) return null;
+  const handleDownloadPDF = async () => {
+    const node = document.getElementById("casos-print-area");
+    if (!node) return;
+
+    try {
+      setIsGeneratingPdf(true);
+
+      const dataUrl = await toPng(node, {
+        quality: 1,
+        pixelRatio: 2.5,
+        backgroundColor: "#ffffff",
+        cacheBust: true,
+      });
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      pdf.addImage(dataUrl, "PNG", 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 2) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(dataUrl, "PNG", 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save("CBSJC-Anexo-B-12-Casos-Practicos-Seguridad.pdf");
+    } catch (err) {
+      console.error("Error generating PDF:", err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-[28px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          className="w-full max-w-4xl bg-white rounded-[28px] border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         >
           {/* Header (Light Theme) */}
-          <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+          <div className="p-5 sm:p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                 <BookOpen className="w-5 h-5 text-accent" />
               </div>
               <div>
                 <span className="text-[10px] font-black tracking-widest text-accent uppercase">
                   Anexo B · Casos Prácticos Institucionales
                 </span>
-                <h3 className="text-base sm:text-lg font-black text-primary uppercase">
+                <h3 className="text-sm sm:text-base md:text-lg font-black text-primary uppercase">
                   Banco de 12 Casos de Custodia Escolar
                 </h3>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-700 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPdf}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-white hover:bg-primary-light text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                title="Descargar Casos en PDF"
+              >
+                {isGeneratingPdf ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">Descargar PDF</span>
+              </button>
+
+              <button
+                onClick={onClose}
+                className="p-2 text-slate-400 hover:text-slate-700 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Search & Filter Bar (Light Theme) */}
@@ -201,7 +262,7 @@ export default function CasosPracticosModal({
           </div>
 
           {/* Cases List (Light Theme) */}
-          <div className="p-6 overflow-y-auto space-y-3.5 flex-1 bg-white custom-scrollbar">
+          <div className="p-5 sm:p-6 overflow-y-auto space-y-3.5 flex-1 bg-white custom-scrollbar">
             {filteredCases.length === 0 ? (
               <div className="text-center py-12 text-slate-400 text-xs font-semibold">
                 No se encontraron casos que coincidan con la búsqueda.
@@ -266,16 +327,113 @@ export default function CasosPracticosModal({
           </div>
 
           {/* Footer (Light Theme) */}
-          <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
-            <span className="font-medium">Casos para discusión y fundamentación en jornadas pedagógicas.</span>
-            <button
-              onClick={onClose}
-              className="px-5 py-2 bg-primary hover:bg-primary-light text-white font-bold rounded-xl transition-all cursor-pointer shadow-xs uppercase tracking-wider text-[11px]"
-            >
-              Cerrar
-            </button>
+          <div className="p-4 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <span className="font-medium text-center sm:text-left">
+              Casos para discusión y fundamentación en jornadas pedagógicas y comités de seguridad.
+            </span>
+            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPdf}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isGeneratingPdf ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                <span>Descargar PDF</span>
+              </button>
+              <button
+                onClick={onClose}
+                className="flex-1 sm:flex-none px-6 py-2.5 bg-primary hover:bg-primary-light text-white font-bold rounded-xl transition-all cursor-pointer shadow-xs uppercase tracking-wider text-xs"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </motion.div>
+      </div>
+
+      {/* Hidden Printable Container for High-Res Multi-page PDF */}
+      <div className="fixed -left-[9999px] top-0 pointer-events-none">
+        <div
+          id="casos-print-area"
+          className="w-[794px] bg-white p-10 text-slate-900 font-sans space-y-6"
+        >
+          {/* Official Header */}
+          <div className="flex items-center justify-between border-b-2 border-[#0B1953] pb-4">
+            <div className="flex items-center gap-4">
+              <div className="relative h-16 w-16">
+                <Image
+                  src="/logo-cbsjc.png"
+                  alt="Escudo CBSJC"
+                  width={64}
+                  height={64}
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <h1 className="text-base font-black text-[#0B1953] uppercase tracking-tight">
+                  COLEGIO BILINGÜE SAN JOSÉ CAMPESTRE
+                </h1>
+                <p className="text-xs font-bold text-[#D91A23] uppercase">
+                  CBSJC S.A.S. · Protocolos Institucionales de Seguridad
+                </p>
+                <p className="text-[10px] text-slate-500 font-medium">
+                  Palmira, Valle del Cauca · Vigencia 2026 - 2027
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="inline-block bg-[#0B1953]/10 text-[#0B1953] font-mono font-bold text-[11px] px-3 py-1 rounded-md border border-[#0B1953]/20">
+                SJB-RGD003 V2
+              </span>
+              <p className="text-[10px] font-bold text-slate-600 mt-1 uppercase">
+                ANEXO B: BANCO DE 12 CASOS PRÁCTICOS
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <h2 className="text-sm font-black text-[#0B1953] uppercase">
+              Situaciones Reales de Custodia y Resolución Técnico-Jurídica
+            </h2>
+            <p className="text-[11px] text-slate-600 leading-relaxed text-justify">
+              Guía de análisis jurisprudencial e institucional para la resolución preventiva de incidentes en patios, traslados, salidas y emergencias escolares.
+            </p>
+          </div>
+
+          {/* 12 Cases Grid */}
+          <div className="space-y-4">
+            {CASOS_ANEXO_B.map((c) => (
+              <div key={c.id} className="border border-slate-300 rounded-xl p-3.5 bg-slate-50/50 space-y-2">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#0B1953] text-white text-[10px] font-black px-2 py-0.5 rounded">
+                      CASO #{c.id}
+                    </span>
+                    <span className="font-bold text-xs text-[#0B1953] uppercase">{c.title}</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#D91A23] font-mono">{c.numeral}</span>
+                </div>
+
+                <div className="text-[11px] text-slate-700 leading-snug">
+                  <strong className="text-slate-900 uppercase text-[10px]">Hechos: </strong>
+                  {c.facts}
+                </div>
+
+                <div className="text-[11px] text-emerald-950 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200 leading-snug">
+                  <strong className="text-emerald-900 uppercase text-[10px] block mb-0.5">
+                    Resolución y Estándar Institucional:
+                  </strong>
+                  {c.protocolAnalysis}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="pt-6 border-t border-slate-200 text-center text-[10px] text-slate-400">
+            Colegio Bilingüe San José Campestre — Protocolos de Seguridad SJB-RGD003 V2 • Desarrollado por Scibaru AI
+          </div>
+        </div>
       </div>
     </AnimatePresence>
   );

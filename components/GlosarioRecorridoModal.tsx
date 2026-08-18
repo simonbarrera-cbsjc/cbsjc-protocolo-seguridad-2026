@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, BookOpen, ChevronLeft, ChevronRight, CheckCircle2, RotateCw, Lightbulb, Shield, ShieldCheck } from "lucide-react";
+import { X, BookOpen, ChevronLeft, ChevronRight, CheckCircle2, RotateCw, Lightbulb, ShieldCheck, Download, Loader2 } from "lucide-react";
+import { toPng } from "html-to-image";
+import jsPDF from "jspdf";
 
 interface GlosarioItem {
   id: string;
@@ -58,43 +61,43 @@ const GLOSARIO_ITEMS: GlosarioItem[] = [
     numeral: "Idea Fuerza 2 & Num. 41",
     frontQuestion: "¿Cuáles son los 3 momentos obligatorios de verificación y conteo de estudiantes?",
     backDefinition: "La rutina institucional exige: 1. Conteo al salir del aula de origen; 2. Conteo al llegar al destino (cancha, laboratorio, huerta); 3. Conteo al finalizar y retornar al aula.",
-    practicalTip: "Si al contar notas que falta un estudiante, no te desplaces: reporta de inmediato a Coordinación y activa búsqueda preventiva."
+    practicalTip: "Contar cabezas en voz alta y en filas ordenadas previene extravíos temporales en las 22 zonas del campus."
   },
   {
     id: "g6",
-    term: "22 Zonas de Acompañamiento",
-    badge: "Descansos Escolares",
+    term: "Matriz de Patios & 22 Zonas",
+    badge: "Acompañamiento en Recesos",
     numeral: "Numeral 49",
-    frontQuestion: "¿Cómo opera la custodia en patios y cuáles son las 7 reglas innegociables de zona?",
-    backDefinition: "El campus está dividido en 22 zonas perimetrales cubiertas por 26 docentes bajo una matriz rotativa de 13 semanas. Reglas clave: puntualidad estricta, recorrido perimetral activo, control de baños y puntos ciegos, y no retirarse sin relevo formal.",
-    practicalTip: "En zonas de criterio reforzado (gradas, piscina, baños y canchas de fútbol), la vigilancia visual debe ser continua."
+    frontQuestion: "¿Cómo opera la vigilancia durante los descansos escolares y qué es el recorrido perimetral?",
+    backDefinition: "El campus está dividido en 22 zonas supervisadas bajo rotación semanal. Cada docente asignado debe llegar puntual al inicio del descanso, realizar recorrido perimetral activo constante y vigilar esquinas y accesos a baños.",
+    practicalTip: "Los relevos informales están prohibidos; si debes retirarte, solicita reemplazo formal a Coordinación."
   },
   {
     id: "g7",
-    term: "Código de Carnés de Visitantes",
-    badge: "Portería y Acceso",
-    numeral: "Numeral 50",
-    frontQuestion: "¿Qué restricciones tiene cada color de carné (Rojo, Azul, Verde, Negro)?",
-    backDefinition: "• ROJO: Proveedores (solo almacén/compras, jamás pasillos de estudiantes).\n• AZUL: Familias en admisiones (siempre con acompañamiento institucional).\n• VERDE: Eventos (restringido a zonas autorizadas).\n• NEGRO: Citaciones (con cita previa y escolta a coordinación).",
-    practicalTip: "Si ves a un visitante con carné ROJO o sin carné caminando solo por pasillos o cerca a baños, abórdalo de inmediato y repórtalo a portería."
+    term: "Baños de Estudiantes & Numeral 45",
+    badge: "Privacidad y Protección",
+    numeral: "Num. 42, 43, 44 & 45",
+    frontQuestion: "¿Cuáles son las reglas de oro respecto a baños infantiles y presencia de adultos?",
+    backDefinition: "Los baños de estudiantes son de uso exclusivo para niños y adolescentes. Queda terminantemente prohibido el ingreso de adultos, contratistas, conductores o acudientes. En Preescolar el docente acompaña hasta la puerta exterior.",
+    practicalTip: "Si detectas a un adulto en un baño estudiantil, intercéptalo, guíalo al baño de adultos y notifica a Portería."
   },
   {
     id: "g8",
-    term: "Uso Exclusivo de Baños",
-    badge: "Protección a Menores",
-    numeral: "Numeral 45",
-    frontQuestion: "¿Quiénes pueden utilizar los baños de los estudiantes en el colegio?",
-    backDefinition: "Los baños de estudiantes son de uso EXCLUSIVO de los niños, niñas y adolescentes matriculados. Queda terminantemente prohibido el ingreso de padres, proveedores, contratistas, conductores o docentes a estos sanitarios.",
-    practicalTip: "Adultos y visitantes disponen de baños exclusivos para el personal y visitas en el área administrativa."
+    term: "Régimen de Carnés en Portería",
+    badge: "Seguridad de Accesos",
+    numeral: "Numeral 7 & 17",
+    frontQuestion: "¿Qué significan los colores de carné y qué restricciones conllevan?",
+    backDefinition: "Rojo: Proveedores y técnicos (restringido a compras/cafetería, no entran a salones); Azul: Familias en admisiones (siempre acompañadas); Verde: Visitantes de eventos masivos; Amarillo/Naranja: Citaciones individuales.",
+    practicalTip: "Cualquier persona sin carné visible en el campus debe ser orientada inmediatamente a la recepción/portería."
   },
   {
     id: "g9",
-    term: "Cadena de Comunicación Formal",
-    badge: "Trazabilidad Institucional",
+    term: "Cadena de Mando Institucional",
+    badge: "Gestión de Incidentes",
     numeral: "Numeral 22",
-    frontQuestion: "¿Cuál es el orden jerárquico estricto para reportar cualquier anomalía o novedad?",
-    backDefinition: "La secuencia obligatoria es: Docente Titular ➔ Coordinación Académica/Convivencia ➔ Rectoría ➔ Familias / Padres de Familia ➔ Autoridades Externas (Policía de Infancia, ICBF, ARL).",
-    practicalTip: "Ningún docente o colaborador debe contactar directamente a externos o emitir comunicados públicos sin autorización previa de Rectoría."
+    frontQuestion: "¿Cuál es el conducto regular obligatorio ante cualquier novedad o situación de riesgo?",
+    backDefinition: "Escalón 1: Docente / Colaborador en sitio -> Escalón 2: Coordinación de Convivencia -> Escalón 3: Rectoría Institucional -> Padres de Familia -> Autoridades Externas (Policía de Infancia, ICBF, Bomberos).",
+    practicalTip: "Ningún funcionario debe comunicarse con medios o entidades externas sin autorización de Rectoría."
   },
   {
     id: "g10",
@@ -117,6 +120,7 @@ export default function GlosarioRecorridoModal({
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [reviewed, setReviewed] = useState<Record<number, boolean>>({});
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   if (!isOpen) return null;
 
@@ -144,10 +148,55 @@ export default function GlosarioRecorridoModal({
   const totalReviewed = Object.keys(reviewed).length;
   const progressPercent = Math.round((totalReviewed / GLOSARIO_ITEMS.length) * 100);
 
+  const handleDownloadPDF = async () => {
+    const node = document.getElementById("glosario-print-area");
+    if (!node) return;
+
+    try {
+      setIsGeneratingPdf(true);
+
+      const dataUrl = await toPng(node, {
+        quality: 1,
+        pixelRatio: 2.5,
+        backgroundColor: "#ffffff",
+        cacheBust: true,
+      });
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      pdf.addImage(dataUrl, "PNG", 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 2) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(dataUrl, "PNG", 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save("CBSJC-Glosario-Conceptos-Clave-Seguridad.pdf");
+    } catch (err) {
+      console.error("Error generating PDF:", err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -155,9 +204,9 @@ export default function GlosarioRecorridoModal({
           className="w-full max-w-2xl bg-white rounded-[28px] border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
+          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 bg-slate-50/80">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0">
                 <BookOpen className="w-5 h-5 text-accent" />
               </div>
               <div>
@@ -165,21 +214,33 @@ export default function GlosarioRecorridoModal({
                   Inducción Previa al Roadmap
                 </span>
                 <h3 className="text-sm sm:text-base font-black text-primary uppercase">
-                  Glosario & Conceptos Clave de Seguridad
+                  Glosario & Conceptos Clave
                 </h3>
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPdf}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-white hover:bg-primary-light text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                title="Descargar Glosario en PDF"
+              >
+                {isGeneratingPdf ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">Descargar PDF</span>
+              </button>
+
+              <button
+                onClick={onClose}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Progress bar */}
-          <div className="px-6 pt-4 pb-2 bg-white">
+          <div className="px-5 sm:px-6 pt-4 pb-2 bg-white">
             <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-wider text-text-muted mb-1.5">
               <span>Concepto {currentIdx + 1} de {GLOSARIO_ITEMS.length}</span>
               <span className="text-accent font-bold">Repasados: {totalReviewed}/{GLOSARIO_ITEMS.length} ({progressPercent}%)</span>
@@ -193,13 +254,12 @@ export default function GlosarioRecorridoModal({
           </div>
 
           {/* Flashcard Body */}
-          <div className="p-6 flex-1 overflow-y-auto flex flex-col justify-center items-center">
-            
+          <div className="p-5 sm:p-6 flex-1 overflow-y-auto flex flex-col justify-center items-center">
             <div 
               onClick={handleFlip}
-              className="w-full max-w-lg min-h-[300px] cursor-pointer perspective-1000 select-none"
+              className="w-full max-w-lg min-h-[290px] cursor-pointer perspective-1000 select-none"
             >
-              <div className={`relative w-full h-full min-h-[300px] preserve-3d transition-transform duration-500 rounded-[24px] border ${
+              <div className={`relative w-full h-full min-h-[290px] preserve-3d transition-transform duration-500 rounded-[24px] border ${
                 isFlipped 
                   ? "rotate-y-180 bg-blue-50/70 border-primary/30 shadow-md" 
                   : "bg-slate-50/80 hover:bg-white border-slate-200 hover:border-accent hover:shadow-md shadow-xs"
@@ -211,7 +271,7 @@ export default function GlosarioRecorridoModal({
                     <span className="text-[10px] font-black uppercase tracking-widest text-accent bg-accent/10 px-3 py-1 rounded-full border border-accent/20">
                       {currentItem.badge}
                     </span>
-                    <span className="text-[10px] font-bold text-text-muted">
+                    <span className="text-[10px] font-bold text-text-muted font-mono">
                       {currentItem.numeral}
                     </span>
                   </div>
@@ -263,11 +323,10 @@ export default function GlosarioRecorridoModal({
 
               </div>
             </div>
-
           </div>
 
           {/* Footer Controls */}
-          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between">
+          <div className="px-5 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between">
             <button
               onClick={handlePrev}
               disabled={currentIdx === 0}
@@ -311,13 +370,93 @@ export default function GlosarioRecorridoModal({
                 className="flex items-center gap-1 px-5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all cursor-pointer shadow-xs uppercase tracking-wider"
               >
                 <ShieldCheck className="w-4 h-4" />
-                <span>¡Listo, a los Módulos!</span>
+                <span>¡Listo!</span>
               </button>
             )}
           </div>
-
         </motion.div>
+      </div>
 
+      {/* Hidden Printable Container for High-Res Multi-page PDF */}
+      <div className="fixed -left-[9999px] top-0 pointer-events-none">
+        <div
+          id="glosario-print-area"
+          className="w-[794px] bg-white p-10 text-slate-900 font-sans space-y-6"
+        >
+          {/* Official Header */}
+          <div className="flex items-center justify-between border-b-2 border-[#0B1953] pb-4">
+            <div className="flex items-center gap-4">
+              <div className="relative h-16 w-16">
+                <Image
+                  src="/logo-cbsjc.png"
+                  alt="Escudo CBSJC"
+                  width={64}
+                  height={64}
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <h1 className="text-base font-black text-[#0B1953] uppercase tracking-tight">
+                  COLEGIO BILINGÜE SAN JOSÉ CAMPESTRE
+                </h1>
+                <p className="text-xs font-bold text-[#D91A23] uppercase">
+                  CBSJC S.A.S. · Protocolos Institucionales de Seguridad
+                </p>
+                <p className="text-[10px] text-slate-500 font-medium">
+                  Palmira, Valle del Cauca · Vigencia 2026 - 2027
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="inline-block bg-[#0B1953]/10 text-[#0B1953] font-mono font-bold text-[11px] px-3 py-1 rounded-md border border-[#0B1953]/20">
+                SJB-RGD003 V2
+              </span>
+              <p className="text-[10px] font-bold text-slate-600 mt-1 uppercase">
+                GLOSARIO DE SEGURIDAD ESCOLAR
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <h2 className="text-sm font-black text-[#0B1953] uppercase">
+              10 Conceptos y Directrices Clave de Custodia y Convivencia
+            </h2>
+            <p className="text-[11px] text-slate-600 leading-relaxed text-justify">
+              Compendio de definiciones técnico-operativas del Protocolo Institucional de Seguridad SJB-RGD003 V2 para consulta docente y directiva.
+            </p>
+          </div>
+
+          {/* Concepts List */}
+          <div className="space-y-3.5">
+            {GLOSARIO_ITEMS.map((item, idx) => (
+              <div key={item.id} className="border border-slate-300 rounded-xl p-3.5 bg-slate-50/50 space-y-1.5">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#0B1953] text-white text-[10px] font-black px-2 py-0.5 rounded">
+                      {idx + 1}
+                    </span>
+                    <span className="font-bold text-xs text-[#0B1953] uppercase">{item.term}</span>
+                    <span className="text-[10px] text-[#D91A23] font-semibold">[{item.badge}]</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-slate-600">{item.numeral}</span>
+                </div>
+
+                <p className="text-[11px] text-slate-800 leading-snug font-medium">
+                  {item.backDefinition}
+                </p>
+
+                <div className="text-[10px] text-amber-950 bg-amber-50/80 p-2 rounded-md border border-amber-200 font-semibold">
+                  Pauta Operativa: {item.practicalTip}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="pt-6 border-t border-slate-200 text-center text-[10px] text-slate-400">
+            Colegio Bilingüe San José Campestre — Protocolos de Seguridad SJB-RGD003 V2 • Desarrollado por Scibaru AI
+          </div>
+        </div>
       </div>
     </AnimatePresence>
   );
